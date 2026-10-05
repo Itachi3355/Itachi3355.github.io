@@ -818,7 +818,7 @@ details.table-view th, details.table-view td { text-align: left; padding: 0.25re
           <circle cx="450" cy="214" r="3" class="f-screen"/><rect x="449" y="215" width="2" height="7" class="f-screen"/>
           <rect x="384" y="180" width="34" height="4" rx="2" class="scr-dim"/><rect x="384" y="192" width="24" height="4" rx="2" class="scr-b"/>
           <rect x="482" y="180" width="34" height="4" rx="2" class="scr-dim"/><rect x="492" y="192" width="24" height="4" rx="2" class="scr-b"/>
-          <text x="450" y="247" text-anchor="middle" class="scr-txt">0 leaks · 144 tests</text>
+          <text x="450" y="247" text-anchor="middle" class="scr-txt">guard: on</text>
         </g>
         <g class="role role-backend">
           <rect x="372" y="166" width="156" height="92" class="f-screen"/>
@@ -827,7 +827,7 @@ details.table-view th, details.table-view td { text-align: left; padding: 0.25re
           <rect x="436" y="177" width="30" height="18" rx="4" class="scr-b"/>
           <rect x="436" y="211" width="30" height="18" rx="4" class="scr-b"/>
           <rect x="488" y="194" width="30" height="18" rx="4" class="scr-a"/>
-          <text x="450" y="249" text-anchor="middle" class="scr-txt">200 OK · p99 42ms</text>
+          <text x="450" y="249" text-anchor="middle" class="scr-txt">200 OK</text>
         </g>
         <g class="role role-data">
           <rect x="372" y="166" width="156" height="92" class="f-screen"/>
@@ -836,7 +836,7 @@ details.table-view th, details.table-view td { text-align: left; padding: 0.25re
           <rect x="436" y="210" width="14" height="30" rx="2" class="scr-a"/><rect x="458" y="194" width="14" height="46" rx="2" class="scr-a"/>
           <rect x="480" y="184" width="14" height="56" rx="2" class="scr-a"/>
           <polyline points="399,206 421,196 443,198 465,184 487,174 509,170" fill="none" style="stroke:var(--scr-c);stroke-width:2.2;stroke-linejoin:round"/>
-          <text x="450" y="254" text-anchor="middle" class="scr-txt">R² = 0.91</text>
+          <text x="450" y="254" text-anchor="middle" class="scr-txt">df.describe()</text>
         </g>
         <g class="pwned">
           <rect x="372" y="166" width="156" height="92" class="f-screen"/>
@@ -2328,21 +2328,21 @@ details.table-view th, details.table-view td { text-align: left; padding: 0.25re
     security: {
       lead: "I break AI agents on purpose, then build defenses that still hold when the attacker adapts.",
       sub: "Prompt-injection research on AgentDojo, audit tooling for agent setups and capability limits for computer-use agents, built on five years of banking-grade backends.",
-      msgs: ["scanning inputs", "guard is up", "red-teaming…", "0 leaks today", "trust no tools"],
+      msgs: ["scanning inputs", "guard is up", "red-teaming…", "injection blocked", "trust no tools"],
       cmds: ["python attack.py --bench agentdojo --adaptive", "pytest tests/capabilities -q", "python run_sweep.py --defense classifier"],
       skills: ["Prompt-injection defense", "Evaluation harnesses", "Agent Skills", "MCP servers", "Python", "LangGraph"]
     },
     backend: {
       lead: "Five years of Java and Spring Boot services for banks, and now I put AI inside them.",
       sub: "Microservices and ML services for banking clients at Tata Consultancy Services, infrastructure as code on AWS, and now LLM agents on a credit union’s fraud platform.",
-      msgs: ["200 OK · 42ms", "services green", "deploying v2.3", "java brewing…", "migrations done"],
+      msgs: ["200 OK", "services green", "deploying…", "java brewing…", "migrations done"],
       cmds: ["./mvnw spring-boot:run", "curl -s localhost:8080/actuator/health", "cdk deploy agent-stack", "terraform plan -out=tfplan"],
       skills: ["Java", "Spring Boot", "FastAPI", "Microservices", "SQL", "PostgreSQL", "Redis", "AWS", "Lambda", "API Gateway", "DynamoDB", "CloudFormation", "AWS CDK", "Terraform", "Docker", "Kubernetes (EKS)"]
     },
     data: {
       lead: "I turn messy data into models and answers people can check.",
       sub: "An M.S. in Advanced Data Analytics (3.8 GPA), SQL feature pipelines tuned 25% faster, models validated with ROC/AUC and k-fold cross-validation, and evaluation work where every number traces back to a run.",
-      msgs: ["R² = 0.91", "cleaning data", "plotting trends", "checking CIs", "n=144, not 14"],
+      msgs: ["fitting a model", "cleaning data", "plotting trends", "checking CIs", "n=144, not 14"],
       cmds: ["python analyze.py --data phase2_results.csv", "jupyter nbconvert --execute phase2.ipynb", "python -c \"import pandas\""],
       skills: ["Python", "SQL", "Pandas", "scikit-learn", "XGBoost", "PostgreSQL", "MLflow", "ML services", "Evaluation harnesses"]
     }
@@ -2596,7 +2596,7 @@ details.table-view th, details.table-view td { text-align: left; padding: 0.25re
     { re: /research|paper|publication|adaptive|agentdojo|thesis/i, bubble: "my favorite topic",
       a: "How much of prompt-injection defense survives an attacker who adapts. The AgentDojo experiments are done and the paper is in preparation. The results section below shows the numbers.", link: ["#results", "See the results ↓"] },
     { re: /contact|email|reach|resume|\bcv\b|phone|call|linkedin|interview|schedule/i, bubble: "find him below",
-      a: "Email and LinkedIn are in the contact section. He replies quickly.", contact: true },
+      a: "Email and LinkedIn are in the contact section.", contact: true },
     { soft: true, re: /current|right now|employer|rbfcu|randolph|where.*work/i, bubble: "at work, mostly",
       a: "AI Software Engineer (contract) at Randolph-Brooks Federal Credit Union since August 2025, building LLM services and LangGraph agents for the fraud investigation platform." },
     { soft: true, re: /experience|years|background|senior|level|worked|history/i, bubble: "5+ years",
@@ -2605,7 +2605,7 @@ details.table-view th, details.table-view td { text-align: left; padding: 0.25re
   // Skills from the resume. Keys are what people type; values are the display name.
   var SKILLS = {
     "python": "Python", "java": "Java", "spring": "Spring Boot", "javascript": "JavaScript", "typescript": "TypeScript", "react": "React", "node": "Node.js",
-    "aws": "AWS", "lambda": "AWS Lambda", "api gateway": "API Gateway", "\\bs3\\b": "S3", "cloudwatch": "CloudWatch", "\\biam\\b": "IAM","sagemaker": "SageMaker", "bedrock": "Bedrock", "cloudformation": "CloudFormation", "cdk": "AWS CDK", "terraform": "Terraform",
+    "aws": "AWS", "lambda": "AWS Lambda", "api gateway": "API Gateway", "\\bs3\\b": "S3", "cloudwatch": "CloudWatch", "\\biam\\b": "IAM","sagemaker": "SageMaker", "cloudformation": "CloudFormation", "cdk": "AWS CDK", "terraform": "Terraform",
     "langgraph": "LangGraph", "langchain": "LangChain", "rag": "RAG pipelines", "mcp": "MCP servers", "openai": "OpenAI APIs", "anthropic": "Anthropic APIs", "claude": "Claude",
     "llm": "LLM integration", "agent": "agentic systems", "prompt injection": "prompt-injection defense",
     "pytorch": "PyTorch", "tensorflow": "TensorFlow", "keras": "Keras", "scikit": "scikit-learn", "sklearn": "scikit-learn", "xgboost": "XGBoost", "hugging": "Hugging Face Transformers", "mlflow": "MLflow",
