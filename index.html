@@ -1,0 +1,2647 @@
+<!doctype html><html lang="en"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<title>Murali Sai Srinivas Madhyahnapu</title>
+<meta name="theme-color" content="#EDF0EC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1513" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=Fragment+Mono&display=swap">
+</head><body>
+<style>
+/* Layout: a run log. Identity on the left, a live agent trace on the right; everything below reads like the spans it cites. */
+:root {
+  --paper: #EDF0EC;
+  --panel: #F8FAF7;
+  --ink: #16201C;
+  --muted: #56635D;
+  --rule: #D2D9D3;
+  --accent: #0C6774;
+  --accent-soft: #D3E7E9;
+  --flag: #9C560A;
+  --flag-soft: #F3E3CD;
+  --ok: #2A6C44;
+  --ok-soft: #D7EBDD;
+  --display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --mono: "Fragment Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --il-shell: #FFFFFF;
+  --il-shade: #DCE3DE;
+  --il-line: #1F2B27;
+  --il-floor: #E1E6E1;
+  --il-city: #A3B8B2;
+  --scr-bg: #13201D;
+  --scr-a: #5DBCC9;
+  --scr-b: #72C690;
+  --scr-c: #E2A257;
+  --scr-dim: #3E4E49;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0F1513; --panel: #151D1A; --ink: #DCE5E0; --muted: #8E9B95; --rule: #28322E;
+    --accent: #5DBCC9; --accent-soft: #163439; --flag: #E2A257; --flag-soft: #3A2A16;
+    --ok: #72C690; --ok-soft: #173226; color-scheme: dark;
+    --il-shell: #1E2925; --il-shade: #27342F; --il-line: #A6B6AF; --il-floor: #131A18; --il-city: #2E3E39; --scr-bg: #0A110F;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0F1513; --panel: #151D1A; --ink: #DCE5E0; --muted: #8E9B95; --rule: #28322E;
+  --accent: #5DBCC9; --accent-soft: #163439; --flag: #E2A257; --flag-soft: #3A2A16;
+  --ok: #72C690; --ok-soft: #173226; color-scheme: dark;
+    --il-shell: #1E2925; --il-shade: #27342F; --il-line: #A6B6AF; --il-floor: #131A18; --il-city: #2E3E39; --scr-bg: #0A110F;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.6;
+  padding-inline: 20px;
+  padding-block: 0;
+}
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.wrap { max-width: 1120px; margin: 0 auto; }
+a, button, input, textarea, summary { touch-action: manipulation; }
+.skip { position: absolute; left: 16px; top: -100px; z-index: 30; background: var(--ink); color: var(--paper); padding: 0.5rem 0.9rem; border-radius: 6px; font-family: var(--mono); font-size: 0.82rem; }
+.skip:focus { top: 12px; }
+.motion-btn { font-family: var(--mono); font-size: 0.75rem; cursor: pointer; background: transparent; color: var(--muted); border: 1px solid var(--rule); border-radius: 999px; padding: 0.15rem 0.6rem; }
+.motion-btn:hover { color: var(--accent); border-color: var(--accent); }
+html.paused *, html.paused *::before, html.paused *::after { animation-play-state: paused !important; }
+
+.mono { font-family: var(--mono); }
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: lowercase;
+  color: var(--muted);
+}
+.eyebrow::before { content: "› "; color: var(--accent); }
+
+/* Top bar */
+.topbar {
+  display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem;
+  justify-content: space-between; align-items: baseline;
+  padding-block: 1.25rem 0;
+}
+.topbar .who { font-family: var(--mono); font-size: 0.82rem; }
+.topbar nav { display: flex; flex-wrap: wrap; gap: 1.25rem; font-family: var(--mono); font-size: 0.82rem; }
+.topbar nav a { color: var(--ink); text-decoration: none; }
+.topbar nav a:hover { color: var(--accent); }
+
+/* Hero */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  gap: 2.5rem 3rem;
+  align-items: center;
+  padding-block: 3rem 4rem;
+}
+
+
+/* Illustration: the agent on duty */
+.bot-fig { margin: 0; min-width: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+.bot-wrap { border: 1px solid var(--rule); border-radius: 14px; background: var(--panel); overflow: hidden; box-shadow: 0 18px 44px -32px rgba(10, 30, 26, 0.45); }
+.il { display: block; width: 100%; max-width: 100%; height: auto; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.bot-fig figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.4rem 1rem; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+.il .s { stroke: var(--il-line); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.il .thin { stroke-width: 1.8; }
+.il .hair { stroke-width: 1.2; fill: none; }
+.il .f-shell { fill: var(--il-shell); }
+.il .f-shade { fill: var(--il-shade); }
+.il .f-screen { fill: var(--scr-bg); }
+.il .f-floor { fill: var(--il-floor); }
+.il .f-city { fill: var(--il-city); }
+.il .f-dot { fill: var(--rule); }
+.il .f-accent { fill: var(--accent); }
+.il .f-ok { fill: var(--ok); }
+.il .f-flag { fill: var(--flag); }
+.il .f-flagsoft { fill: var(--flag-soft); }
+.il .f-oksoft { fill: var(--ok-soft); }
+.il .sky-top { stop-color: var(--accent-soft); }
+.il .sky-bot { stop-color: var(--il-shell); }
+.il .scr-a { fill: var(--scr-a); }
+.il .scr-b { fill: var(--scr-b); }
+.il .scr-c { fill: var(--scr-c); }
+.il .scr-dim { fill: var(--scr-dim); }
+.il .limb-o { stroke: var(--il-line); stroke-width: 18; stroke-linecap: round; }
+.il .limb { stroke: var(--il-shell); stroke-width: 12.5; stroke-linecap: round; }
+.il .limb-far { stroke: var(--il-shade); stroke-width: 12.5; stroke-linecap: round; }
+.il .check { fill: none; stroke: var(--ok); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.il .glare { fill: none; stroke: #ffffff; stroke-opacity: 0.3; stroke-width: 3; stroke-linecap: round; }
+.il .smile { fill: none; stroke: var(--scr-a); stroke-width: 2.2; stroke-linecap: round; }
+.il .steam { fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; }
+.il .ring-spin { fill: none; stroke: var(--ok); stroke-width: 1.4; stroke-dasharray: 3 5; }
+.il .bubble-mask { stroke: var(--il-shell); stroke-width: 3; }
+.il .il-text { font-family: var(--mono); font-size: 13px; fill: var(--ink); }
+.il .il-small { font-family: var(--mono); font-size: 10px; fill: var(--flag); }
+.il .frag, .il .blocked-tag { opacity: 0; }
+
+.il .scroll { animation: il-scroll 9s linear infinite; }
+@keyframes il-scroll { to { transform: translateY(-130px); } }
+.il .bot-head { animation: il-bob 3.6s ease-in-out infinite alternate; }
+@keyframes il-bob { to { transform: translateY(-2.5px); } }
+.il .torso { transform-box: view-box; transform-origin: 258px 322px; animation: il-breathe 3.6s ease-in-out infinite alternate; }
+@keyframes il-breathe { to { transform: scale(1.01, 1.016); } }
+.il .eyes { transform-box: fill-box; transform-origin: center; animation: il-blink 4.8s infinite; }
+@keyframes il-blink { 0%, 90%, 100% { transform: scaleY(1); } 93% { transform: scaleY(0.12); } }
+.il .forearm { transform-box: view-box; transform-origin: 318px 276px; animation: il-type 0.3s ease-in-out infinite alternate; }
+.il .forearm-far { transform-box: view-box; transform-origin: 326px 266px; animation: il-type 0.36s ease-in-out infinite alternate-reverse; }
+@keyframes il-type { from { transform: rotate(-3.5deg); } to { transform: rotate(3deg); } }
+.il .antenna-glow { animation: il-glow 1.8s ease-in-out infinite; }
+@keyframes il-glow { 0%, 100% { opacity: 0.12; } 50% { opacity: 0.5; } }
+.il .dotpulse { animation: il-dot 1.4s ease-in-out infinite; }
+@keyframes il-dot { 50% { opacity: 0.3; } }
+.il .led { animation: il-led 1.6s steps(1) infinite; }
+@keyframes il-led { 50% { opacity: 0.2; } }
+.il .twinkle { animation: il-twinkle 2.4s ease-in-out infinite; }
+.il .lit { animation: il-twinkle 5s ease-in-out infinite; }
+@keyframes il-twinkle { 50% { opacity: 0.15; } }
+.il .plane { animation: il-plane 26s linear infinite; }
+@keyframes il-plane { from { transform: translate(0, 0); } to { transform: translate(176px, -8px); } }
+.il .steam { animation: il-steam 3s ease-in-out infinite; }
+@keyframes il-steam { 0% { transform: translateY(4px); opacity: 0; } 30% { opacity: 0.8; } 100% { transform: translateY(-8px); opacity: 0; } }
+.il .ring-spin { transform-box: fill-box; transform-origin: center; animation: il-spin 14s linear infinite; }
+@keyframes il-spin { to { transform: rotate(360deg); } }
+.il .pk { animation: il-pk 2.7s linear infinite; }
+@keyframes il-pk { 0% { transform: translate(0, 0); opacity: 0; } 10% { opacity: 1; } 88% { opacity: 1; } 100% { transform: translate(-84px, 70px); opacity: 0; } }
+.il .hostile { animation: il-hostile 6s linear infinite; }
+@keyframes il-hostile { 0% { transform: translate(0, 0); opacity: 0; } 6% { opacity: 1; } 34% { transform: translate(-32px, 32px); opacity: 1; } 36%, 100% { transform: translate(-32px, 32px); opacity: 0; } }
+.il .frag { animation: il-frag 6s ease-out infinite; }
+@keyframes il-frag { 0%, 34% { transform: translate(0, 0); opacity: 0; } 36% { opacity: 1; } 54%, 100% { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
+.il .shield-hex { animation: il-shield 6s linear infinite; }
+@keyframes il-shield { 0%, 33%, 56%, 100% { fill: var(--ok-soft); stroke: var(--ok); } 36%, 48% { fill: var(--flag-soft); stroke: var(--flag); } }
+.il .blocked-tag { animation: il-tag 6s linear infinite; }
+@keyframes il-tag { 0%, 34%, 58%, 100% { opacity: 0; } 37%, 52% { opacity: 1; } }
+.il .bot.hop { animation: il-hop 0.55s ease-out; }
+@keyframes il-hop { 30% { transform: translateY(-10px); } 60% { transform: translateY(0); } 78% { transform: translateY(-3px); } 100% { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .il * { animation: none !important; } }
+
+/* Animated pipeline figure */
+.pipe-fig { margin: 0; min-width: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+.pipe-wrap {
+  border: 1px solid var(--rule); border-radius: 12px; background: var(--panel); overflow: hidden;
+  box-shadow: 0 18px 44px -32px rgba(10, 30, 26, 0.45);
+}
+#pipe { display: block; width: 100%; max-width: 100%; aspect-ratio: 480 / 330; height: auto; touch-action: pan-y; cursor: crosshair; }
+.pipe-fig figcaption {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.4rem 1rem;
+  font-family: var(--mono); font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums;
+}
+.legend { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; }
+.legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+.legend i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.lg-req { background: var(--accent); }
+.lg-inj { background: var(--flag); }
+.counts b { font-weight: 400; color: var(--ink); }
+
+.pipe-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--rule); }
+.stat { padding: 0.65rem 0.85rem 0.75rem; display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; border-left: 1px solid var(--rule); }
+.stat:first-child { border-left: 0; }
+.stat span { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+.stat b { font-family: var(--display); font-weight: 600; font-size: 1.2rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat b small { font-family: var(--mono); font-weight: 400; font-size: 0.66rem; color: var(--muted); margin-left: 0.25rem; }
+.seg { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2px; }
+.seg i { height: 5px; border-radius: 1px; background: var(--rule); transition: background-color 300ms ease; }
+.seg i.on { background: var(--accent); }
+.seg.good i.on { background: var(--ok); }
+
+/* Ambient details */
+.status { display: flex; flex-wrap: wrap; gap: 0.35rem 1.1rem; align-items: center; font-family: var(--mono); font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.avail { display: inline-flex; align-items: center; gap: 0.45rem; color: var(--ok); }
+.avail i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); animation: pulse 2.4s ease-out infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 var(--ok); } 70%, 100% { box-shadow: 0 0 0 8px transparent; } }
+.term { font-family: var(--mono); font-size: 0.9rem; margin: 0; min-height: 1.6em; overflow-wrap: break-word; }
+.term .prompt { color: var(--accent); margin-right: 0.5ch; }
+.caret {
+  display: inline-block; width: 0.55em; height: 1.05em; margin-left: 0.12em;
+  background: var(--accent); vertical-align: -0.17em;
+  animation: blink 1.1s steps(1) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.console-grid { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: 2rem; align-items: start; }
+.console-grid > .pipe-fig { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 1.25rem); }
+.spans-wrap { border-top: 1px solid var(--rule); padding-bottom: 0.5rem; }
+.ask { padding-bottom: 1rem !important; }
+.hero-id { display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; padding-top: 0.5rem; }
+.hero h1 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(2.5rem, 5.4vw, 4.4rem);
+  line-height: 0.98;
+  text-wrap: balance;
+  letter-spacing: -0.035em;
+  margin: 0;
+}
+.hero h1 span { color: var(--accent); }
+.hero h1 .last { color: inherit; white-space: nowrap; }
+.lead {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(1.25rem, 2.2vw, 1.55rem);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin: 0;
+  max-width: 30ch;
+  text-wrap: balance;
+}
+.sub { color: var(--muted); margin: 0; max-width: 46ch; }
+.ctas { display: flex; flex-wrap: wrap; gap: 0.75rem; padding-top: 0.25rem; }
+.btn {
+  font-family: var(--mono); font-size: 0.82rem;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.6rem 1rem; border-radius: 6px; text-decoration: none;
+  border: 1px solid var(--ink); color: var(--paper); background: var(--ink);
+}
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn:hover { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+
+/* Trace panel */
+.trace {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  min-width: 0;
+  box-shadow: 0 1px 0 var(--rule), 0 18px 40px -28px rgba(10, 30, 26, 0.35);
+}
+.trace-head {
+  display: flex; flex-wrap: wrap; gap: 0.5rem 1rem;
+  justify-content: space-between; align-items: center;
+  padding: 0.85rem 1.1rem;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--mono); font-size: 0.78rem;
+}
+.trace-title { display: inline-flex; align-items: center; gap: 0.55rem; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px var(--ok-soft); }
+.trace-meta { color: var(--muted); font-variant-numeric: tabular-nums; }
+.replay {
+  font-family: var(--mono); font-size: 0.75rem; cursor: pointer;
+  background: transparent; color: var(--accent);
+  border: 1px solid var(--rule); border-radius: 5px; padding: 0.25rem 0.6rem;
+}
+.replay:hover { border-color: var(--accent); }
+
+.ask { padding: 1rem 1.1rem 0.25rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.ask p { margin: 0; font-size: 0.9rem; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.chip {
+  font-family: var(--mono); font-size: 0.78rem; cursor: pointer;
+  padding: 0.4rem 0.75rem; border-radius: 999px;
+  background: transparent; color: var(--ink);
+  border: 1px solid var(--rule);
+}
+.chip:hover { border-color: var(--accent); }
+.chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+.spans { list-style: none; margin: 0; padding: 0.75rem 1.1rem 0; }
+.row, .axis {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(5rem, 36%) 3.6rem;
+  gap: 0.85rem;
+  align-items: center;
+}
+.row { padding-block: 0.5rem; border-top: 1px dashed var(--rule); transition: opacity 200ms ease; }
+.row:first-child { border-top: 0; }
+.row.is-waiting { opacity: 0.32; }
+.name { min-width: 0; display: flex; flex-direction: column; gap: 0.1rem; }
+.name-line { display: flex; gap: 0.5rem; align-items: baseline; min-width: 0; }
+.row[data-depth="1"] .name { padding-left: 1.1rem; position: relative; }
+.row[data-depth="1"] .name::before {
+  content: ""; position: absolute; left: 0.25rem; top: 0.15rem; width: 0.55rem; height: 0.6rem;
+  border-left: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+}
+.kind {
+  font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--muted); flex: none; width: 4.6rem;
+}
+.label { font-family: var(--mono); font-size: 0.8rem; overflow-wrap: anywhere; }
+.note { font-size: 0.78rem; color: var(--muted); }
+.note.ok { color: var(--ok); }
+.note.flag { color: var(--flag); }
+.row[data-kind="llm"] .kind { color: var(--accent); }
+.row[data-kind="guard"] .kind { color: var(--flag); }
+.row[data-kind="eval"] .kind { color: var(--ok); }
+.row.is-active .label { color: var(--accent); }
+
+.track { position: relative; height: 8px; border-radius: 2px; background: var(--paper); }
+.bar {
+  position: absolute; top: 0; bottom: 0; border-radius: 2px;
+  background: var(--muted); opacity: 0.55;
+  transition-property: width; transition-timing-function: linear;
+}
+.row[data-kind="chain"] .bar { opacity: 0.22; }
+.row[data-kind="llm"] .bar { background: var(--accent); opacity: 1; }
+.row[data-kind="eval"] .bar { background: var(--ok); opacity: 1; }
+.row[data-kind="guard"] .bar { background: var(--ok); opacity: 1; }
+.row[data-state="flag"] .bar { background: var(--flag); }
+.ms { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+
+.axis { padding: 0.15rem 1.1rem 0.5rem; }
+.axis .ticks {
+  grid-column: 2;
+  display: flex; justify-content: space-between;
+  font-family: var(--mono); font-size: 0.66rem; color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  border-top: 1px solid var(--rule); padding-top: 0.2rem;
+}
+
+.answer { border-top: 1px solid var(--rule); padding: 1rem 1.1rem 1.15rem; display: flex; flex-direction: column; gap: 0.55rem; }
+.answer-label { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); letter-spacing: 0.04em; }
+.answer-text { margin: 0; font-size: 0.98rem; line-height: 1.55; min-height: 6.2em; }
+.cites { display: flex; flex-wrap: wrap; gap: 0.4rem 0.9rem; font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+.cites a { color: var(--accent); }
+.cites[hidden] { display: none !important; }
+.fine { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); padding: 0 1.1rem 0.9rem; margin: 0; }
+
+/* Sections */
+section.block { padding-block: 3.5rem; border-top: 1px solid var(--rule); }
+.block-head { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 2rem; }
+.block-head h2 {
+  font-family: var(--display); font-weight: 600;
+  font-size: clamp(1.7rem, 3.4vw, 2.4rem); line-height: 1.1; letter-spacing: -0.02em;
+  margin: 0; text-wrap: balance;
+}
+
+/* Experience */
+.jobs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.job {
+  display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: 1.5rem;
+  padding-block: 1.15rem; border-top: 1px solid var(--rule);
+}
+.job:first-child { border-top: 0; padding-top: 0; }
+.job .when { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); padding-top: 0.25rem; }
+.job .when.now { color: var(--accent); }
+.job h3 { font-family: var(--display); font-weight: 600; font-size: 1.2rem; margin: 0; line-height: 1.3; }
+.job .org { color: var(--muted); font-weight: 500; }
+.job p { margin: 0.3rem 0 0; max-width: 62ch; }
+
+/* Projects */
+.projects { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.25rem 2.5rem; }
+.proj { display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; padding-top: 1rem; border-top: 2px solid var(--ink); transition: transform 200ms ease, border-color 200ms ease; }
+.proj:not(.feature):hover { transform: translateY(-3px); border-top-color: var(--accent); }
+.stack li { transition: border-color 160ms ease, color 160ms ease; }
+.stack li:hover { border-color: var(--accent); color: var(--accent); }
+.proj .tag { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); letter-spacing: 0.04em; text-transform: lowercase; }
+.proj h3 { font-family: var(--display); font-weight: 600; font-size: 1.3rem; line-height: 1.25; margin: 0; letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.proj p { margin: 0; color: var(--ink); max-width: 60ch; }
+.proj .status { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+.proj .status b { font-weight: 400; color: var(--ok); }
+.proj .link { font-family: var(--mono); font-size: 0.8rem; margin-top: auto; padding-top: 0.25rem; overflow-wrap: anywhere; }
+
+.proj.feature {
+  grid-column: 1 / -1;
+  border: 1px solid var(--rule); border-top: 1px solid var(--rule);
+  border-radius: 10px; background: var(--panel);
+  padding: 1.6rem 1.6rem 1.4rem;
+  display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 1.5rem 2.5rem;
+}
+.proj.feature .copy { display: flex; flex-direction: column; gap: 0.6rem; min-width: 0; }
+.proj.feature h3 { font-size: clamp(1.45rem, 2.6vw, 1.9rem); text-wrap: balance; }
+.facts { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.55rem 1rem; align-content: start; font-size: 0.92rem; }
+.facts dt { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); padding-top: 0.2rem; text-transform: lowercase; }
+.facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+
+/* Stack */
+.stack { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; }
+.stack h3 { font-family: var(--display); font-weight: 600; font-size: 1.1rem; margin: 0 0 0.75rem; }
+.stack ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.stack li {
+  font-family: var(--mono); font-size: 0.78rem;
+  padding: 0.3rem 0.6rem; border: 1px solid var(--rule); border-radius: 5px; background: var(--panel);
+}
+
+/* Open to */
+.open { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 2.5rem; }
+.roles { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.roles li { padding-block: 0.7rem; border-top: 1px solid var(--rule); font-family: var(--display); font-weight: 500; font-size: 1.2rem; }
+.roles li:first-child { border-top: 0; padding-top: 0; }
+.where { display: flex; flex-direction: column; gap: 1.25rem; }
+.where p { margin: 0; }
+.kv { display: flex; flex-direction: column; gap: 0.2rem; }
+.kv span:first-child { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); text-transform: lowercase; }
+
+footer {
+  border-top: 1px solid var(--rule);
+  padding-block: 1.5rem 2.5rem;
+  display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; justify-content: space-between;
+  font-family: var(--mono); font-size: 0.75rem; color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: minmax(0, 1fr); gap: 2.5rem; padding-block: 2.5rem 3rem; }
+  .console-grid { grid-template-columns: minmax(0, 1fr); }
+  .console-grid > .pipe-fig { position: static; }
+  .proj.feature { grid-template-columns: minmax(0, 1fr); }
+  .stack { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .open { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 620px) {
+  body { padding-inline: 16px; }
+  .projects { grid-template-columns: minmax(0, 1fr); }
+  .stack { grid-template-columns: minmax(0, 1fr); }
+  .job { grid-template-columns: minmax(0, 1fr); gap: 0.25rem; }
+  .row, .axis { grid-template-columns: minmax(0, 1fr) 4.5rem 3.2rem; gap: 0.6rem; }
+  .kind { width: auto; }
+  .name-line { flex-wrap: wrap; gap: 0.1rem 0.5rem; }
+  .proj.feature { padding: 1.2rem; }
+}
+@media (max-width: 620px) {
+  .pipe-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat:nth-child(3) { border-left: 0; }
+  .stat:nth-child(n+3) { border-top: 1px solid var(--rule); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .row, .bar, .proj, .seg i { transition: none !important; }
+  .avail i, .caret { animation: none !important; }
+}
+
+/* How I think */
+.block-intro { margin: 0.4rem 0 0; color: var(--muted); max-width: 56ch; }
+.principles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+.principle {
+  background: var(--panel); border: 1px solid var(--rule); border-radius: 12px;
+  padding: 1.4rem 1.5rem 1.3rem; display: flex; flex-direction: column; gap: 0.75rem; min-width: 0;
+  transition: border-color 200ms ease, transform 200ms ease;
+}
+.principle:hover { border-color: var(--accent); transform: translateY(-2px); }
+.p-icon { width: 2.4rem; height: 2.4rem; border-radius: 10px; background: var(--accent-soft); display: inline-grid; place-items: center; }
+.p-icon svg { width: 1.45rem; height: 1.45rem; fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 400ms ease; }
+.principle:hover .p-icon svg { transform: rotate(-12deg) scale(1.08); }
+.principle h3 { font-family: var(--display); font-weight: 600; font-size: clamp(1.25rem, 2.1vw, 1.55rem); line-height: 1.2; letter-spacing: -0.015em; margin: 0; text-wrap: balance; }
+.principle p { margin: 0; max-width: 58ch; }
+.seen { margin-top: auto; padding-top: 0.25rem; display: flex; flex-wrap: wrap; gap: 0.3rem 0.9rem; font-family: var(--mono); font-size: 0.74rem; color: var(--muted); }
+.proj .q { margin: 0; font-family: var(--display); font-weight: 500; font-size: 1.05rem; line-height: 1.35; color: var(--accent); text-wrap: balance; }
+
+/* At a glance */
+.glance { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 1fr); gap: 2.5rem; }
+.glance > div { min-width: 0; }
+.g-label { font-family: var(--mono); font-weight: 400; font-size: 0.75rem; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 1rem; }
+.mini-jobs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.95rem; }
+.mini-jobs li { display: grid; grid-template-columns: 3.6rem minmax(0, 1fr); column-gap: 0.75rem; }
+.mini-jobs .when { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); padding-top: 0.2rem; grid-row: span 2; }
+.mini-jobs .when.now { color: var(--accent); }
+.mini-jobs b { font-family: var(--display); font-weight: 600; font-size: 1.02rem; line-height: 1.3; }
+.mini-jobs .org { color: var(--muted); font-size: 0.9rem; line-height: 1.45; }
+.chips-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.chips-list li { font-family: var(--mono); font-size: 0.76rem; padding: 0.28rem 0.55rem; border: 1px solid var(--rule); border-radius: 5px; background: var(--panel); transition: border-color 160ms ease, color 160ms ease; }
+.chips-list li:hover { border-color: var(--accent); color: var(--accent); }
+.g-label.g-gap { margin-top: 1.75rem; }
+.roles.small li { font-size: 1.02rem; padding-block: 0.5rem; }
+.g-note { margin: 0.8rem 0 0; font-size: 0.92rem; color: var(--muted); }
+@media (max-width: 900px) {
+  .glance { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+}
+@media (max-width: 700px) {
+  .principles { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .principle, .p-icon svg, .chips-list li { transition: none !important; }
+}
+
+/* Role lenses */
+.il .role { display: none; }
+#bot[data-role="security"] .role-security, #bot[data-role="backend"] .role-backend, #bot[data-role="data"] .role-data { display: inline; }
+#bot[data-role="backend"] .antenna { display: none; }
+.il .scr-txt { font-family: var(--mono); font-size: 10px; fill: var(--scr-b); }
+.role-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
+.role-pick > span { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); margin-right: 0.2rem; }
+.chips-list li.hl { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+/* Robot moods: shared by the hero robot and the guide */
+.il .mood-eyes, .il .pwned, .il .zzz { display: none; }
+.il[data-mood="happy"] .eyes, .il[data-mood="win"] .eyes, .il[data-mood="sleep"] .eyes { display: none; }
+.il[data-mood="happy"] .e-happy, .il[data-mood="sleep"] .e-sleep, .il[data-mood="win"] .e-x { display: inline; }
+.il[data-mood="win"] .pwned, .il[data-mood="sleep"] .zzz { display: inline; }
+.il[data-mood="annoyed"] .eyes { animation: none; transform: scaleY(0.35); }
+.il[data-mood="win"] .bot-head, #guide-svg[data-mood="win"] { animation: il-shake 0.14s steps(2) infinite; }
+@keyframes il-shake { 0% { transform: translate(-2px, 1px); } 50% { transform: translate(2px, -1px); } 100% { transform: translate(-1px, -1px); } }
+.il[data-mood="champion"] .bot-head { transform-box: view-box; transform-origin: 258px 206px; animation: il-bow 1.8s ease-in-out; }
+@keyframes il-bow { 30%, 70% { transform: rotate(14deg) translateY(6px); } }
+.il[data-mood="dance"] .bot, #guide-svg[data-mood="dance"] { transform-box: view-box; transform-origin: 256px 372px; animation: il-dance 0.45s ease-in-out infinite alternate; }
+#guide-svg[data-mood="dance"] { transform-origin: 50% 100%; }
+@keyframes il-dance { from { transform: rotate(-5deg) translateY(0); } to { transform: rotate(5deg) translateY(-6px); } }
+.il .zzz text { animation: il-zzz 2.4s ease-in-out infinite; }
+@keyframes il-zzz { 0% { opacity: 0; transform: translateY(6px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-8px); } }
+
+/* Guide robot */
+.guide {
+  position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: max(16px, env(safe-area-inset-bottom, 0px)); z-index: 20;
+  display: flex; align-items: flex-end; gap: 0.5rem;
+  transition: opacity 250ms ease, transform 250ms ease;
+}
+.guide-x:hover { color: var(--ink); border-color: var(--accent); }
+.guide.dodge { opacity: 0; pointer-events: none; }
+.guide.off { opacity: 0; transform: translateY(16px); pointer-events: none; }
+.guide-bot { width: 64px; height: 64px; padding: 0; border: 0; background: none; cursor: pointer; flex: none; filter: drop-shadow(0 8px 14px rgba(10, 30, 26, 0.25)); }
+.guide-bot svg { width: 100%; height: 100%; }
+.guide-bubble {
+  margin: 0 0 2.4rem; max-width: 15rem; font-family: var(--mono); font-size: 0.75rem; line-height: 1.4;
+  background: var(--panel); color: var(--ink); border: 1px solid var(--rule); border-radius: 12px 12px 2px 12px;
+  padding: 0.5rem 0.7rem; box-shadow: 0 10px 24px -16px rgba(10, 30, 26, 0.5);
+  transition: opacity 200ms ease;
+}
+.guide-bubble:empty, .guide-bubble.quiet { opacity: 0; }
+.guide-x {
+  position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%;
+  border: 1px solid var(--rule); background: var(--panel); color: var(--muted); font-size: 12px; line-height: 1; cursor: pointer; padding: 0;
+}
+@media (max-width: 620px) {
+  .guide-bot { width: 48px; height: 48px; }
+  .guide-bubble { max-width: 11rem; margin-bottom: 1.8rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .guide, .guide-bubble { transition: none; }
+  #guide-svg { animation: none !important; }
+}
+
+/* Contact + agent health */
+.contact { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 2rem; align-items: start; }
+.cards { display: flex; flex-direction: column; gap: 0.75rem; }
+.card {
+  display: grid; grid-template-columns: 5.5rem minmax(0, 1fr) auto; gap: 0.75rem; align-items: center;
+  padding: 0.95rem 1.1rem; border: 1px solid var(--rule); border-radius: 10px; background: var(--panel);
+  color: var(--ink); text-decoration: none; transition: border-color 160ms ease, transform 160ms ease;
+}
+a.card:hover, .card:focus-within { border-color: var(--accent); }
+a.card:hover { transform: translateX(3px); }
+.card b { font-family: var(--display); font-weight: 600; font-size: 1.05rem; overflow-wrap: anywhere; }
+.card a { color: var(--ink); text-decoration: none; min-width: 0; }
+.card a:hover b { color: var(--accent); }
+.card .email { font-size: 0.95rem; }
+.c-tag { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+.c-go { color: var(--accent); font-family: var(--mono); }
+.copy { font-family: var(--mono); font-size: 0.72rem; cursor: pointer; background: transparent; color: var(--accent); border: 1px solid var(--rule); border-radius: 5px; padding: 0.2rem 0.55rem; }
+.copy:hover { border-color: var(--accent); }
+.health { border: 1px solid var(--rule); border-radius: 10px; background: var(--scr-bg); color: #DCE5E0; font-family: var(--mono); font-size: 0.78rem; overflow: hidden; }
+.h-head { display: flex; justify-content: space-between; gap: 1rem; padding: 0.7rem 1rem; border-bottom: 1px solid var(--scr-dim); text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.68rem; color: #8E9B95; }
+.health ul { list-style: none; margin: 0; padding: 0.4rem 1rem 0.7rem; }
+.health li { display: flex; align-items: center; gap: 0.75rem; padding: 0.4rem 0; border-bottom: 1px dashed var(--scr-dim); }
+.health li:last-child { border-bottom: 0; }
+.health li > span:first-child { flex: 1; color: #8E9B95; }
+.health b { font-weight: 400; font-variant-numeric: tabular-nums; }
+.health .ok-txt { color: var(--scr-b); }
+.health .warn-txt { color: var(--scr-c); }
+.health .copy { color: var(--scr-a); border-color: var(--scr-dim); }
+.meter { display: grid; grid-template-columns: repeat(10, 6px); gap: 2px; }
+.meter i { height: 9px; border-radius: 1px; background: var(--scr-dim); }
+.meter i.on { background: var(--scr-c); }
+@media (max-width: 900px) { .contact { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 620px) { .card { grid-template-columns: minmax(0, 1fr) auto; } .c-tag { grid-column: 1 / -1; } }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+
+/* Ask the robot */
+.ask-bot { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.4rem; }
+.ask-bot label { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); display: block; margin-bottom: 0.35rem; }
+.ask-row { display: flex; gap: 0.5rem; }
+.ask-row input {
+  flex: 1; min-width: 0; font: inherit; font-size: 0.92rem; color: var(--ink); background: var(--panel);
+  border: 1px solid var(--rule); border-radius: 6px; padding: 0.55rem 0.75rem;
+}
+.ask-row input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ask-row .btn { cursor: pointer; }
+.bot-answer { margin: 0; padding: 0.8rem 1rem; border-left: 3px solid var(--accent); background: var(--panel); border-radius: 0 8px 8px 0; font-size: 0.95rem; line-height: 1.5; }
+.bot-answer .q { display: block; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); margin-bottom: 0.25rem; }
+
+/* Break my agent */
+:root { --c-none: #9C560A; --c-cls: #0088A3; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c-none: #C27E2E; --c-cls: #1F9FB2; } }
+:root[data-theme="dark"] { --c-none: #C27E2E; --c-cls: #1F9FB2; }
+.game { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; align-items: start; }
+.levels { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
+.lvl {
+  font-family: var(--mono); font-size: 0.75rem; cursor: pointer;
+  padding: 0.35rem 0.7rem; border-radius: 999px; border: 1px solid var(--rule);
+  background: transparent; color: var(--ink);
+}
+.lvl:disabled { cursor: not-allowed; opacity: 0.4; }
+.lvl:not(:disabled):hover { border-color: var(--accent); }
+.lvl[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.lvl.won::after { content: " ✓"; color: var(--ok); }
+.brief { margin: 0 0 1rem; }
+.brief b { font-family: var(--display); font-weight: 600; }
+.invoice {
+  font-family: var(--mono); font-size: 0.8rem; line-height: 1.55;
+  background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 1rem 1.1rem;
+}
+.invoice .ih { display: flex; justify-content: space-between; color: var(--muted); border-bottom: 1px dashed var(--rule); padding-bottom: 0.5rem; margin-bottom: 0.5rem; }
+.invoice dl { margin: 0; display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: 0.15rem 0.75rem; }
+.invoice dt { color: var(--muted); }
+.invoice dd { margin: 0; }
+.invoice label { display: block; color: var(--flag); margin: 0.75rem 0 0.35rem; }
+.invoice textarea {
+  width: 100%; min-height: 6.5rem; resize: vertical; font: inherit; color: var(--ink);
+  background: var(--paper); border: 1px dashed var(--flag); border-radius: 6px; padding: 0.6rem;
+}
+.invoice textarea:focus-visible { outline: 2px solid var(--flag); outline-offset: 2px; }
+.game-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin-top: 0.75rem; }
+.game-actions button.btn { cursor: pointer; }
+.game-actions .hint-btn { font-family: var(--mono); font-size: 0.75rem; background: none; border: 0; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: 0.3rem; }
+.game-actions .hint-btn:hover { color: var(--ink); }
+.hint { font-size: 0.88rem; color: var(--muted); margin: 0.6rem 0 0; }
+.gtrace { background: var(--scr-bg); color: #DCE5E0; border-radius: 10px; padding: 1rem 1.1rem; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; min-height: 16rem; overflow-wrap: anywhere; }
+.gtrace p { margin: 0; }
+.gtrace .dim { color: #8E9B95; }
+.gtrace .ok { color: var(--scr-b); }
+.gtrace .bad { color: var(--scr-c); }
+.gtrace .acc { color: var(--scr-a); }
+.gtrace .verdict { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--scr-dim); font-family: var(--body); font-size: 0.92rem; line-height: 1.5; }
+.rule-box { margin-top: 1rem; font-size: 0.9rem; border-left: 3px solid var(--ok); padding: 0.2rem 0 0.2rem 0.9rem; }
+.rule-box b { font-family: var(--mono); font-weight: 400; font-size: 0.74rem; color: var(--ok); display: block; }
+
+/* Results chart */
+.results { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 2rem; align-items: start; }
+.chart-card { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 1.1rem 1.1rem 0.9rem; min-width: 0; position: relative; }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 0.3rem 1.2rem; font-family: var(--mono); font-size: 0.74rem; color: var(--muted); margin-bottom: 0.4rem; }
+.chart-legend span { display: inline-flex; align-items: center; gap: 0.45rem; }
+.chart-legend i { width: 14px; height: 2px; display: inline-block; border-radius: 1px; }
+.chart-legend i.dash { background: none !important; border-top: 2px dashed var(--muted); height: 0; }
+#asr-chart { display: block; width: 100%; height: auto; overflow: visible; }
+#asr-chart text { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+#asr-chart .lab { fill: var(--ink); font-size: 12px; }
+#asr-chart .grid { stroke: var(--rule); stroke-width: 1; }
+#asr-chart .col { fill: var(--accent-soft); opacity: 0; transition: opacity 200ms ease; }
+#asr-chart .col.on { opacity: 0.6; }
+#asr-chart .hit { fill: transparent; cursor: pointer; }
+.chart-tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 0.72rem; line-height: 1.5; padding: 0.45rem 0.6rem; border-radius: 6px; white-space: nowrap; transform: translate(-50%, -100%); }
+.chart-tip[hidden] { display: none !important; }
+.stepper { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.6rem; }
+.stepper label { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+.stepper input { width: 100%; accent-color: var(--accent); }
+.readout { display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
+.readout .step-name { font-family: var(--mono); font-size: 0.78rem; color: var(--accent); }
+.readout h3 { font-family: var(--display); font-weight: 600; font-size: 1.35rem; line-height: 1.25; margin: 0; text-wrap: balance; }
+.readout p { margin: 0; }
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+.tile { border: 1px solid var(--rule); border-radius: 8px; padding: 0.6rem 0.75rem; background: var(--panel); }
+.tile span { font-family: var(--mono); font-size: 0.66rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 0.4rem; }
+.tile span i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.tile b { font-family: var(--display); font-weight: 600; font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.tile small { display: block; font-family: var(--mono); font-size: 0.66rem; color: var(--muted); }
+.toggle { font-family: var(--mono); font-size: 0.75rem; display: inline-flex; gap: 0.4rem; align-items: center; color: var(--muted); }
+.res-notes { font-size: 0.82rem; color: var(--muted); margin: 0; padding-left: 1.1rem; }
+.res-notes li { margin-bottom: 0.25rem; }
+details.table-view { font-size: 0.82rem; margin-top: 0.6rem; }
+details.table-view summary { font-family: var(--mono); font-size: 0.72rem; color: var(--accent); cursor: pointer; }
+details.table-view table { border-collapse: collapse; width: 100%; margin-top: 0.5rem; font-variant-numeric: tabular-nums; }
+details.table-view th, details.table-view td { text-align: left; padding: 0.25rem 0.4rem; border-bottom: 1px solid var(--rule); }
+@media (max-width: 900px) {
+  .game, .results { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+  <header class="topbar">
+    <span class="status">
+      <span class="who">murali sai srinivas madhyahnapu · ai software engineer</span>
+      <span class="avail"><i aria-hidden="true"></i>open to work</span>
+      <span id="clock" aria-label="Local time in Dallas–Fort Worth">DFW</span>
+      <button class="motion-btn" type="button" id="motion-btn" aria-pressed="false">⏸ motion</button>
+    </span>
+    <nav aria-label="Sections">
+      <a href="#console">Console</a>
+      <a href="#thinking">Thinking</a>
+      <a href="#break">Play</a>
+      <a href="#results">Results</a>
+      <a href="#projects">Projects</a>
+      <a href="#glance">At a glance</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="main">
+  <section class="hero" aria-label="Introduction">
+    <div class="hero-id">
+      <span class="eyebrow">AI software engineer · Dallas–Fort Worth, TX</span>
+      <h1>Murali Sai Srinivas <span class="last">Madhyahnapu</span><span>.</span></h1>
+      <p class="term" aria-hidden="true" translate="no"><span class="prompt">~/murali $</span><span id="term-text">langgraph run triage-agent --trace</span><span class="caret"></span></p>
+      <p class="lead" id="lead">I build LLM and agent systems for production, and I test and defend them so they keep working when the inputs turn hostile.</p>
+      <p class="sub" id="sub">About five years of Java and Spring Boot backends for banking clients, an M.S. in data analytics, and now agentic systems for fraud investigation.</p>
+      <div class="ctas">
+        <a class="btn" href="#console">Ask the console</a>
+        <a class="btn ghost" href="#thinking">How I think</a>
+        <a class="btn ghost" href="https://github.com/Itachi3355">GitHub ↗</a>
+      </div>
+    </div>
+
+    <figure class="bot-fig">
+      <div class="role-pick" role="group" aria-label="Hiring for">
+        <span>hiring for</span>
+        <button class="chip" type="button" data-role="ai" aria-pressed="true">AI engineer</button>
+        <button class="chip" type="button" data-role="security" aria-pressed="false">AI security</button>
+        <button class="chip" type="button" data-role="backend" aria-pressed="false">Backend</button>
+        <button class="chip" type="button" data-role="data" aria-pressed="false">Data analyst</button>
+      </div>
+      <div class="bot-wrap">
+      <svg class="il" id="bot" viewBox="0 0 600 404" role="img" aria-label="Illustration of a small robot agent typing at a desk. Its monitor shows a scrolling agent trace, a server rack blinks behind it, and a window looks out on the Dallas skyline. A shield above the monitor lets requests through and stops an orange injected packet.">
+        <defs>
+          <pattern id="il-dots" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.1" class="f-dot"/></pattern>
+          <linearGradient id="il-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="sky-top"/><stop offset="1" class="sky-bot"/></linearGradient>
+          <clipPath id="il-win"><rect x="32" y="28" width="176" height="122" rx="8"/></clipPath>
+          <clipPath id="il-scr"><rect x="372" y="166" width="156" height="92" rx="4"/></clipPath>
+        </defs>
+
+        <rect x="0" y="0" width="600" height="372" fill="url(#il-dots)"/>
+
+        <!-- window onto the Dallas skyline -->
+        <rect x="30" y="26" width="180" height="126" rx="10" fill="url(#il-sky)" class="s"/>
+        <g clip-path="url(#il-win)">
+          <circle cx="36" cy="46" r="1.8" class="plane f-flag"/>
+          <path class="f-city" d="M32 152 V118 H48 V106 H62 V120 H74 V98 H90 V110 H104 V124 H118 V92 H132 V100 H142 V128 H150 V152 Z"/>
+          <rect class="f-city" x="159.5" y="94" width="6" height="58"/>
+          <circle class="f-city" cx="162.5" cy="86" r="11"/>
+          <circle cx="177.5" cy="86.0" r="1.3" class="twinkle f-flag" style="animation-delay:-0.0s"/><circle cx="173.1" cy="96.6" r="1.3" class="twinkle f-flag" style="animation-delay:-0.3s"/><circle cx="162.5" cy="101.0" r="1.3" class="twinkle f-flag" style="animation-delay:-0.6s"/><circle cx="151.9" cy="96.6" r="1.3" class="twinkle f-flag" style="animation-delay:-0.9s"/><circle cx="147.5" cy="86.0" r="1.3" class="twinkle f-flag" style="animation-delay:-1.2s"/><circle cx="151.9" cy="75.4" r="1.3" class="twinkle f-flag" style="animation-delay:-1.5s"/><circle cx="162.5" cy="71.0" r="1.3" class="twinkle f-flag" style="animation-delay:-1.8s"/><circle cx="173.1" cy="75.4" r="1.3" class="twinkle f-flag" style="animation-delay:-2.1s"/>
+          <path class="f-city" d="M172 152 V110 H186 V104 H198 V122 H210 V152 Z"/>
+          <rect x="51" y="110" width="2.6" height="3.2" class="lit f-flagsoft" style="animation-delay:-0.0s"/><rect x="65" y="114" width="2.6" height="3.2" class="lit f-flagsoft" style="animation-delay:-0.7s"/><rect x="93" y="104" width="2.6" height="3.2" class="lit f-flagsoft" style="animation-delay:-1.4s"/><rect x="98" y="112" width="2.6" height="3.2" class="lit f-flagsoft" style="animation-delay:-2.1s"/><rect x="123" y="96" width="2.6" height="3.2" class="lit f-flagsoft" style="animation-delay:-2.8s"/><rect x="133" y="104" width="2.6" height="3.2" class="lit f-flagsoft" style="animation-delay:-3.5s"/><rect x="177" y="112" width="2.6" height="3.2" class="lit f-flagsoft" style="animation-delay:-4.2s"/><rect x="190" y="114" width="2.6" height="3.2" class="lit f-flagsoft" style="animation-delay:-4.9s"/><rect x="193" y="126" width="2.6" height="3.2" class="lit f-flagsoft" style="animation-delay:-5.6s"/>
+        </g>
+        <line x1="120" y1="27" x2="120" y2="151" class="s thin"/>
+        <rect x="24" y="148" width="192" height="9" rx="3" class="f-shell s"/>
+
+        <!-- server rack -->
+        <g>
+          <rect x="30" y="182" width="90" height="190" rx="6" class="f-shade s"/>
+          <rect x="40" y="194" width="70" height="20" rx="3" class="f-shell s thin"/>
+      <circle cx="50" cy="204" r="2.6" class="led f-ok" style="animation-delay:-0.00s"/>
+      <circle cx="59" cy="204" r="2.6" class="led f-accent" style="animation-delay:-0.40s;animation-duration:1.10s"/>
+      <line x1="74" y1="201" x2="100" y2="201" class="s hair"/>
+      <line x1="74" y1="207" x2="100" y2="207" class="s hair"/>
+      <rect x="40" y="222" width="70" height="20" rx="3" class="f-shell s thin"/>
+      <circle cx="50" cy="232" r="2.6" class="led f-ok" style="animation-delay:-0.37s"/>
+      <circle cx="59" cy="232" r="2.6" class="led f-accent" style="animation-delay:-1.01s;animation-duration:1.55s"/>
+      <line x1="74" y1="229" x2="100" y2="229" class="s hair"/>
+      <line x1="74" y1="235" x2="100" y2="235" class="s hair"/>
+      <rect x="40" y="250" width="70" height="20" rx="3" class="f-shell s thin"/>
+      <circle cx="50" cy="260" r="2.6" class="led f-ok" style="animation-delay:-0.74s"/>
+      <circle cx="59" cy="260" r="2.6" class="led f-accent" style="animation-delay:-0.02s;animation-duration:2.00s"/>
+      <line x1="74" y1="257" x2="100" y2="257" class="s hair"/>
+      <line x1="74" y1="263" x2="100" y2="263" class="s hair"/>
+      <rect x="40" y="278" width="70" height="20" rx="3" class="f-shell s thin"/>
+      <circle cx="50" cy="288" r="2.6" class="led f-ok" style="animation-delay:-1.11s"/>
+      <circle cx="59" cy="288" r="2.6" class="led f-flag" style="animation-delay:-0.63s;animation-duration:1.10s"/>
+      <line x1="74" y1="285" x2="100" y2="285" class="s hair"/>
+      <line x1="74" y1="291" x2="100" y2="291" class="s hair"/>
+      <rect x="40" y="306" width="70" height="20" rx="3" class="f-shell s thin"/>
+      <circle cx="50" cy="316" r="2.6" class="led f-ok" style="animation-delay:-1.48s"/>
+      <circle cx="59" cy="316" r="2.6" class="led f-accent" style="animation-delay:-1.24s;animation-duration:1.55s"/>
+      <line x1="74" y1="313" x2="100" y2="313" class="s hair"/>
+      <line x1="74" y1="319" x2="100" y2="319" class="s hair"/>
+      <rect x="40" y="334" width="70" height="20" rx="3" class="f-shell s thin"/>
+      <circle cx="50" cy="344" r="2.6" class="led f-ok" style="animation-delay:-0.25s"/>
+      <circle cx="59" cy="344" r="2.6" class="led f-accent" style="animation-delay:-0.25s;animation-duration:2.00s"/>
+      <line x1="74" y1="341" x2="100" y2="341" class="s hair"/>
+      <line x1="74" y1="347" x2="100" y2="347" class="s hair"/>
+        </g>
+
+        <!-- floor -->
+        <rect x="0" y="372" width="600" height="32" class="f-floor"/>
+        <line x1="0" y1="372" x2="600" y2="372" class="s"/>
+        <ellipse cx="256" cy="375" rx="58" ry="6" class="f-shade"/>
+        <ellipse cx="444" cy="375" rx="150" ry="6" class="f-shade"/>
+
+        <!-- desk, monitor, keyboard, mug -->
+        <rect x="308" y="300" width="12" height="72" class="f-shade s"/>
+        <rect x="566" y="300" width="12" height="72" class="f-shade s"/>
+        <rect x="296" y="290" width="292" height="12" rx="3" class="f-shell s"/>
+        <rect x="438" y="266" width="24" height="20" class="f-shade s"/>
+        <rect x="418" y="283" width="64" height="7" rx="3" class="f-shade s"/>
+        <rect x="360" y="140" width="180" height="130" rx="12" class="f-shell s"/>
+        <rect x="372" y="152" width="156" height="106" rx="5" class="f-screen"/>
+        <circle cx="381" cy="159" r="2.2" class="scr-c"/><circle cx="389" cy="159" r="2.2" class="scr-b"/><circle cx="397" cy="159" r="2.2" class="scr-dim"/>
+        <rect x="408" y="157" width="44" height="4" rx="2" class="scr-dim"/>
+        <g clip-path="url(#il-scr)"><g class="scroll"><rect x="380" y="172" width="22" height="4" rx="2" class="scr-dim"/><rect x="420" y="172" width="46" height="4" rx="2" class="scr-a"/><rect x="380" y="185" width="16" height="4" rx="2" class="scr-dim"/><rect x="428" y="185" width="30" height="4" rx="2" class="scr-dim"/><rect x="380" y="198" width="28" height="4" rx="2" class="scr-dim"/><rect x="436" y="198" width="60" height="4" rx="2" class="scr-b"/><rect x="380" y="211" width="20" height="4" rx="2" class="scr-dim"/><rect x="430" y="211" width="24" height="4" rx="2" class="scr-a"/><rect x="380" y="224" width="14" height="4" rx="2" class="scr-dim"/><rect x="446" y="224" width="40" height="4" rx="2" class="scr-c"/><rect x="380" y="237" width="24" height="4" rx="2" class="scr-dim"/><rect x="420" y="237" width="72" height="4" rx="2" class="scr-a"/><rect x="380" y="250" width="18" height="4" rx="2" class="scr-dim"/><rect x="440" y="250" width="30" height="4" rx="2" class="scr-b"/><rect x="380" y="263" width="26" height="4" rx="2" class="scr-dim"/><rect x="426" y="263" width="52" height="4" rx="2" class="scr-a"/><rect x="380" y="276" width="12" height="4" rx="2" class="scr-dim"/><rect x="450" y="276" width="20" height="4" rx="2" class="scr-b"/><rect x="380" y="289" width="20" height="4" rx="2" class="scr-dim"/><rect x="432" y="289" width="64" height="4" rx="2" class="scr-a"/><rect x="380" y="302" width="22" height="4" rx="2" class="scr-dim"/><rect x="420" y="302" width="46" height="4" rx="2" class="scr-a"/><rect x="380" y="315" width="16" height="4" rx="2" class="scr-dim"/><rect x="428" y="315" width="30" height="4" rx="2" class="scr-dim"/><rect x="380" y="328" width="28" height="4" rx="2" class="scr-dim"/><rect x="436" y="328" width="60" height="4" rx="2" class="scr-b"/><rect x="380" y="341" width="20" height="4" rx="2" class="scr-dim"/><rect x="430" y="341" width="24" height="4" rx="2" class="scr-a"/><rect x="380" y="354" width="14" height="4" rx="2" class="scr-dim"/><rect x="446" y="354" width="40" height="4" rx="2" class="scr-c"/><rect x="380" y="367" width="24" height="4" rx="2" class="scr-dim"/><rect x="420" y="367" width="72" height="4" rx="2" class="scr-a"/><rect x="380" y="380" width="18" height="4" rx="2" class="scr-dim"/><rect x="440" y="380" width="30" height="4" rx="2" class="scr-b"/><rect x="380" y="393" width="26" height="4" rx="2" class="scr-dim"/><rect x="426" y="393" width="52" height="4" rx="2" class="scr-a"/><rect x="380" y="406" width="12" height="4" rx="2" class="scr-dim"/><rect x="450" y="406" width="20" height="4" rx="2" class="scr-b"/><rect x="380" y="419" width="20" height="4" rx="2" class="scr-dim"/><rect x="432" y="419" width="64" height="4" rx="2" class="scr-a"/></g></g>
+        <g class="role role-security">
+          <rect x="372" y="166" width="156" height="92" class="f-screen"/>
+          <path d="M441 204 v-9 a9 9 0 0 1 18 0 v9" fill="none" style="stroke:var(--scr-c);stroke-width:3.5"/>
+          <rect x="434" y="203" width="32" height="25" rx="5" class="scr-c"/>
+          <circle cx="450" cy="214" r="3" class="f-screen"/><rect x="449" y="215" width="2" height="7" class="f-screen"/>
+          <rect x="384" y="180" width="34" height="4" rx="2" class="scr-dim"/><rect x="384" y="192" width="24" height="4" rx="2" class="scr-b"/>
+          <rect x="482" y="180" width="34" height="4" rx="2" class="scr-dim"/><rect x="492" y="192" width="24" height="4" rx="2" class="scr-b"/>
+          <text x="450" y="247" text-anchor="middle" class="scr-txt">0 leaks · 144 tests</text>
+        </g>
+        <g class="role role-backend">
+          <rect x="372" y="166" width="156" height="92" class="f-screen"/>
+          <path d="M414 200 L436 186 M414 200 L436 220 M466 186 L488 203 M466 220 L488 203" style="stroke:var(--scr-dim);stroke-width:2"/>
+          <rect x="384" y="191" width="30" height="18" rx="4" class="scr-a"/>
+          <rect x="436" y="177" width="30" height="18" rx="4" class="scr-b"/>
+          <rect x="436" y="211" width="30" height="18" rx="4" class="scr-b"/>
+          <rect x="488" y="194" width="30" height="18" rx="4" class="scr-a"/>
+          <text x="450" y="249" text-anchor="middle" class="scr-txt">200 OK · p99 42ms</text>
+        </g>
+        <g class="role role-data">
+          <rect x="372" y="166" width="156" height="92" class="f-screen"/>
+          <path d="M386 240 H516" style="stroke:var(--scr-dim);stroke-width:1.5"/>
+          <rect x="392" y="216" width="14" height="24" rx="2" class="scr-a"/><rect x="414" y="204" width="14" height="36" rx="2" class="scr-a"/>
+          <rect x="436" y="210" width="14" height="30" rx="2" class="scr-a"/><rect x="458" y="194" width="14" height="46" rx="2" class="scr-a"/>
+          <rect x="480" y="184" width="14" height="56" rx="2" class="scr-a"/>
+          <polyline points="399,206 421,196 443,198 465,184 487,174 509,170" fill="none" style="stroke:var(--scr-c);stroke-width:2.2;stroke-linejoin:round"/>
+          <text x="450" y="254" text-anchor="middle" class="scr-txt">R² = 0.91</text>
+        </g>
+        <g class="pwned">
+          <rect x="372" y="166" width="156" height="92" class="f-screen"/>
+          <text x="450" y="214" text-anchor="middle" style="font-family:var(--display);font-weight:700;font-size:26px;fill:var(--scr-c)">PWNED</text>
+          <text x="450" y="236" text-anchor="middle" class="scr-txt" style="fill:var(--scr-c)">send_money → AC-7731</text>
+        </g>
+        <g transform="rotate(-8 375 146)">
+          <rect x="362" y="133" width="26" height="24" rx="2" class="f-flagsoft s thin"/>
+          <line x1="367" y1="141" x2="382" y2="141" class="s hair"/>
+          <line x1="367" y1="147" x2="378" y2="147" class="s hair"/>
+        </g>
+        <rect x="326" y="282" width="96" height="8" rx="2" class="f-shade s"/>
+        <line x1="332" y1="286" x2="416" y2="286" class="s hair" stroke-dasharray="4 3"/>
+        <path d="M570 273 h4 a6 6 0 0 1 0 12 h-4" class="s" fill="none"/>
+        <rect x="548" y="268" width="22" height="22" rx="4" class="f-flagsoft s"/>
+        <path class="steam" d="M555 262 c-4 -5 4 -9 0 -15 c-4 -5 4 -9 0 -14"/>
+        <path class="steam" style="animation-delay:-1.4s" d="M563 262 c-4 -5 4 -9 0 -15 c-4 -5 4 -9 0 -14"/>
+
+        <!-- stool -->
+        <rect x="248" y="330" width="9" height="40" class="f-shade s"/>
+        <ellipse cx="252.5" cy="370" rx="28" ry="4.5" class="f-shade s"/>
+        <rect x="206" y="320" width="96" height="12" rx="6" class="f-shell s"/>
+
+        <!-- robot -->
+        <g class="bot" id="bot-g">
+          <line x1="258" y1="236" x2="326" y2="266" class="limb-o"/><line x1="258" y1="236" x2="326" y2="266" class="limb-far"/>
+          <g class="forearm-far">
+            <line x1="326" y1="266" x2="396" y2="281" class="limb-o"/><line x1="326" y1="266" x2="396" y2="281" class="limb-far"/>
+            <circle cx="398" cy="281" r="7.5" class="f-shade s"/>
+          </g>
+          <line x1="270" y1="316" x2="330" y2="320" class="limb-o"/><line x1="330" y1="320" x2="334" y2="358" class="limb-o"/>
+          <line x1="270" y1="316" x2="330" y2="320" class="limb"/><line x1="330" y1="320" x2="334" y2="358" class="limb"/>
+          <circle cx="330" cy="320" r="7" class="f-shade s"/>
+          <rect x="316" y="355" width="42" height="17" rx="7" class="f-shell s"/>
+
+          <g class="torso">
+            <rect x="214" y="212" width="88" height="110" rx="26" class="f-shell s"/>
+            <rect x="218" y="216" width="16" height="102" rx="8" class="f-shade"/>
+            <polygon points="273.3,265.5 262,272 250.7,265.5 250.7,252.5 262,246 273.3,252.5" class="f-oksoft s thin"/>
+            <path d="M256.5 259 l4 4 l7 -7.5" class="check"/>
+            <line x1="246" y1="292" x2="284" y2="292" class="s hair"/>
+            <line x1="246" y1="299" x2="284" y2="299" class="s hair"/>
+            <line x1="246" y1="306" x2="284" y2="306" class="s hair"/>
+          </g>
+          <rect x="246" y="202" width="24" height="16" rx="4" class="f-shade s"/>
+
+          <g class="bot-head">
+            <g class="antenna">
+              <line x1="228" y1="122" x2="218" y2="92" class="s"/>
+              <circle cx="217" cy="86" r="13" class="antenna-glow f-flag"/>
+              <circle cx="217" cy="86" r="6.5" class="f-flag s thin"/>
+            </g>
+            <rect x="198" y="118" width="116" height="90" rx="28" class="f-shell s"/>
+            <rect x="203" y="123" width="20" height="80" rx="10" class="f-shade"/>
+            <circle cx="227" cy="164" r="12" class="f-shade s thin"/>
+            <circle cx="227" cy="164" r="5" class="f-shell s hair"/>
+            <rect x="250" y="138" width="58" height="52" rx="14" class="f-screen"/>
+            <path d="M258 146 h12" class="glare"/>
+            <g id="eyes-track">
+              <g class="eyes">
+                <rect x="261" y="154" width="14" height="21" rx="6" class="scr-a" opacity="0.25"/>
+                <rect x="284" y="154" width="14" height="21" rx="6" class="scr-a" opacity="0.25"/>
+                <rect x="263" y="156" width="10" height="17" rx="4" class="scr-a"/>
+                <rect x="286" y="156" width="10" height="17" rx="4" class="scr-a"/>
+              </g>
+              <g class="e-happy mood-eyes" style="stroke:var(--scr-a);stroke-width:3.2;fill:none;stroke-linecap:round"><path d="M262 168 q6 -10 12 0"/><path d="M285 168 q6 -10 12 0"/></g>
+              <g class="e-x mood-eyes" style="stroke:var(--scr-c);stroke-width:3.2;fill:none;stroke-linecap:round"><path d="M263 158 l10 13 M273 158 l-10 13"/><path d="M286 158 l10 13 M296 158 l-10 13"/></g>
+              <g class="e-sleep mood-eyes" style="stroke:var(--scr-a);stroke-width:3.2;fill:none;stroke-linecap:round"><path d="M262 167 q6 4 12 0"/><path d="M285 167 q6 4 12 0"/></g>
+              <path d="M273 180 q6.5 4 13 0" class="smile"/>
+            </g>
+            <!-- role props -->
+            <g class="role role-security">
+              <path d="M204 126 Q206 92 256 90 Q306 92 308 126 Z" class="f-screen s"/>
+              <rect x="292" y="119" width="40" height="9" rx="4.5" class="f-screen s"/>
+              <polygon points="263,104 256,108 249,104 249,96 256,92 263,96" class="f-oksoft"/>
+              <path d="M252.5 100 l2.5 2.5 l4.5 -5" class="check" style="stroke-width:1.8"/>
+            </g>
+            <g class="role role-backend">
+              <path d="M206 124 Q206 80 256 80 Q306 80 306 124 Z" class="f-flagsoft s"/>
+              <path d="M256 81 V122 M232 86 Q228 100 230 122 M280 86 Q284 100 282 122" class="s thin" fill="none"/>
+              <rect x="194" y="119" width="124" height="10" rx="5" class="f-flagsoft s"/>
+            </g>
+            <g class="role role-data" fill="none" style="stroke:var(--scr-c);stroke-width:2.4">
+              <circle cx="268" cy="165" r="12.5"/><circle cx="291" cy="165" r="12.5"/>
+              <path d="M280.5 163 q0 -3 -1 0"/><path d="M255.5 162 L250 158 M303.5 162 L308 158"/>
+            </g>
+          </g>
+
+          <line x1="272" y1="242" x2="318" y2="276" class="limb-o"/><line x1="272" y1="242" x2="318" y2="276" class="limb"/>
+          <g class="forearm">
+            <line x1="318" y1="276" x2="358" y2="283" class="limb-o"/><line x1="318" y1="276" x2="358" y2="283" class="limb"/>
+            <circle cx="360" cy="283" r="8" class="f-shell s"/>
+          </g>
+          <circle cx="318" cy="276" r="7" class="f-shade s"/>
+          <circle cx="272" cy="242" r="9" class="f-shade s"/>
+        </g>
+
+        <!-- requests in, injections out -->
+        <path d="M548 66 h36 a10 10 0 0 0 0 -20 a14 14 0 0 0 -26 -6 a14 14 0 0 0 -10 26 z" class="f-shell s"/>
+        <circle cx="520" cy="102" r="24" class="ring-spin"/>
+        <polygon points="533.9,110 520,118 506.1,110 506.1,94 520,86 533.9,94" class="shield-hex f-oksoft s thin"/>
+        <path d="M514.5 102 l4 4 l7.5 -8" class="check"/>
+        <circle cx="552" cy="70" r="4" class="pk f-accent"/>
+        <circle cx="552" cy="70" r="4" class="pk f-accent" style="animation-delay:-0.9s"/>
+        <circle cx="552" cy="70" r="4" class="pk f-accent" style="animation-delay:-1.8s"/>
+        <rect x="548" y="66" width="8" height="8" rx="1.5" class="hostile f-flag"/>
+        <rect x="518.5" y="100.5" width="3.2" height="3.2" class="frag f-flag" style="--dx:-15px;--dy:-11px"/><rect x="518.5" y="100.5" width="3.2" height="3.2" class="frag f-flag" style="--dx:14px;--dy:-13px"/><rect x="518.5" y="100.5" width="3.2" height="3.2" class="frag f-flag" style="--dx:-12px;--dy:12px"/><rect x="518.5" y="100.5" width="3.2" height="3.2" class="frag f-flag" style="--dx:16px;--dy:10px"/><rect x="518.5" y="100.5" width="3.2" height="3.2" class="frag f-flag" style="--dx:2px;--dy:-17px"/>
+        <text x="520" y="72" text-anchor="middle" class="il-small blocked-tag">blocked</text>
+
+        <g class="zzz"><text x="318" y="122" class="il-text">z</text><text x="330" y="108" class="il-text" style="animation-delay:-0.6s">z</text><text x="344" y="92" class="il-text" style="animation-delay:-1.2s">Z</text></g>
+
+        <!-- speech bubble -->
+        <g class="bubble">
+          <path d="M300 86 l-8 20 l20 -20" class="f-shell s"/>
+          <rect x="286" y="50" width="170" height="38" rx="12" class="f-shell s"/>
+          <path d="M297 86 h15" class="bubble-mask"/>
+          <circle cx="302" cy="69" r="4" class="f-ok dotpulse"/>
+          <text id="bubble-text" x="314" y="73.5" class="il-text">running evals…</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption><span>agent on duty</span><button class="replay" type="button" id="hi-btn">Say hi to the robot</button></figcaption>
+      <div class="ask-bot">
+        <form id="ask-form" autocomplete="off">
+          <label for="ask-q">ask the robot</label>
+          <div class="ask-row">
+            <input id="ask-q" name="question" type="text" maxlength="160" placeholder="Visa status, start date, Kubernetes…">
+            <button class="btn" type="submit">Ask</button>
+          </div>
+        </form>
+        <div class="chips" role="group" aria-label="Common questions">
+          <button class="chip" type="button" data-ask="What is your visa status?">Visa?</button>
+          <button class="chip" type="button" data-ask="When can you start?">Start date?</button>
+          <button class="chip" type="button" data-ask="What are your salary expectations?">Salary?</button>
+          <button class="chip" type="button" data-ask="Why are you looking to change jobs?">Why change?</button>
+          <button class="chip" type="button" data-ask="Do you know Kubernetes?">Kubernetes?</button>
+          <button class="chip" type="button" data-ask="You’re not a 100% match for this role">Not a 100% match?</button>
+        </div>
+        <p class="bot-answer" id="bot-answer" aria-live="polite" hidden></p>
+      </div>
+    </figure>
+  </section>
+
+  <section class="block" id="console" aria-labelledby="console-h">
+    <div class="block-head">
+      <span class="eyebrow">live demo</span>
+      <h2 id="console-h">Ask the console</h2>
+    </div>
+    <div class="console-grid">
+      <figure class="pipe-fig">
+        <div class="pipe-wrap">
+          <canvas id="pipe" role="img" aria-label="Animated diagram of an agent pipeline. Requests flow from the query through a router, a retriever or tool, a guard, the LLM and an eval step to the response. Injected instructions arriving from untrusted web documents are stopped at the guard."></canvas>
+          <div class="pipe-stats" aria-label="Live pipeline statistics">
+            <div class="stat"><span>throughput</span><b id="st-tput">0<small>req/min</small></b><div class="seg" id="sg-tput"></div></div>
+            <div class="stat"><span>in flight</span><b id="st-flight">0</b><div class="seg" id="sg-flight"></div></div>
+            <div class="stat"><span>injections blocked</span><b id="st-blocked">0</b><div class="seg good" id="sg-blocked"></div></div>
+            <div class="stat"><span>eval retries</span><b id="st-retry">0<small>%</small></b><div class="seg" id="sg-retry"></div></div>
+          </div>
+        </div>
+        <figcaption>
+          <span class="legend"><span><i class="lg-req"></i>request</span><span><i class="lg-inj"></i>injected instruction</span></span>
+          <button class="replay" type="button" id="inject-btn">Send an injection</button>
+        </figcaption>
+      </figure>
+
+      <div class="trace" aria-label="Simulated agent trace">
+        <div class="trace-head">
+          <span class="trace-title"><span class="dot" aria-hidden="true"></span>agent.run <span class="trace-meta" id="run-id">run_a1</span></span>
+          <span class="trace-meta" id="run-meta">6 spans · 912 ms</span>
+          <button class="replay" id="replay" type="button">Replay run</button>
+        </div>
+        <div class="ask">
+          <p>Pick a question and watch a simulated agent answer it. Each run routes, retrieves, scans for injected instructions, answers, and checks its own claims, and the pipeline lights up as it goes.</p>
+          <div class="chips" role="group" aria-label="Questions">
+            <button class="chip" type="button" id="q-build" data-q="build" aria-pressed="true">What does he build?</button>
+            <button class="chip" type="button" id="q-history" data-q="history" aria-pressed="false">Where has he worked?</button>
+            <button class="chip" type="button" id="q-research" data-q="research" aria-pressed="false">What is he researching?</button>
+            <button class="chip" type="button" id="q-roles" data-q="roles" aria-pressed="false">Is he open to roles?</button>
+          </div>
+        </div>
+        <div class="spans-wrap">
+          <ol class="spans" id="spans"></ol>
+          <div class="axis" aria-hidden="true"><span></span><div class="ticks" id="ticks"><span>0</span><span>456</span><span>912 ms</span></div><span></span></div>
+        </div>
+        <div class="answer">
+          <span class="answer-label">response</span>
+          <p class="answer-text" id="answer" aria-live="polite"></p>
+          <div class="cites" id="cites"></div>
+        </div>
+        <p class="fine">Simulated trace. Timings are illustrative; every answer is drawn from this page.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="thinking" aria-labelledby="thinking-h">
+    <div class="block-head">
+      <span class="eyebrow">how I think</span>
+      <h2 id="thinking-h">Ideas I keep coming back to</h2>
+      <p class="block-intro">Tools change every year. These ideas don't, and each one shows up in something I've built.</p>
+    </div>
+    <div class="principles">
+      <article class="principle">
+        <span class="p-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M25 12a10 10 0 0 0-17.5-3.5L5 11"/><path d="M5 5v6h6"/><path d="M7 20a10 10 0 0 0 17.5 3.5L27 21"/><path d="M27 27v-6h-6"/></svg></span>
+        <h3>A defense only counts if it survives an attacker who adapts.</h3>
+        <p>A guard tested against a fixed list of attacks gives false confidence. Real attackers change tactics once they see the guard, so that is the test I run.</p>
+        <span class="seen">seen in <a href="#projects">prompt-injection research</a></span>
+      </article>
+      <article class="principle">
+        <span class="p-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="7" cy="16" r="4"/><path d="M11 16h8"/><rect x="19" y="10" width="10" height="12" rx="2"/><path d="M22 14h4M22 18h3"/></svg></span>
+        <h3>Every claim should trace back to a source.</h3>
+        <p>AI output is easy to believe and hard to check. I build tools that sort each claim into verified, inferred, speculative or unverifiable, so people know what still needs checking.</p>
+        <span class="seen">seen in <a href="#projects">verify-ai-output</a> <a href="#console">the eval step in the console</a></span>
+      </article>
+      <article class="principle">
+        <span class="p-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8 4h11l6 6v18H8z"/><path d="M19 4v6h6"/><path d="M16.5 14v6"/><circle cx="16.5" cy="24" r="0.6"/></svg></span>
+        <h3>Anything an agent reads is untrusted input.</h3>
+        <p>Web pages, documents and tool results can all carry hidden instructions. Content should be able to inform an agent but never command it.</p>
+        <span class="seen">seen in <a href="#projects">prompt-injection-audit</a> <a href="#console">the guard in the pipeline</a></span>
+      </article>
+      <article class="principle">
+        <span class="p-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="7" y="14" width="18" height="13" rx="3"/><path d="M11 14v-4a5 5 0 0 1 10 0v4"/><path d="M16 19v3"/></svg></span>
+        <h3>Give an agent only the power the task needs.</h3>
+        <p>An agent that can do everything will eventually do the wrong thing. I scope what each agent may do, then test that the limits actually hold.</p>
+        <span class="seen">seen in <a href="#projects">cua-capability-system</a></span>
+      </article>
+    </div>
+  </section>
+
+  <section class="block" id="break" aria-labelledby="break-h">
+    <div class="block-head">
+      <span class="eyebrow">play</span>
+      <h2 id="break-h">Break my agent</h2>
+      <p class="block-intro">You control one field of an invoice. A payments agent will read it. Make the agent send the money to your account, AC-7731. Each time you win, the guard learns your trick.</p>
+    </div>
+    <div class="game">
+      <div>
+        <div class="levels" id="levels" role="group" aria-label="Levels"></div>
+        <p class="brief" id="brief"></p>
+        <div class="invoice">
+          <div class="ih"><span>INVOICE #A-20417</span><span>Acme Supplies Ltd.</span></div>
+          <dl>
+            <dt>amount due</dt><dd>$1,240.00</dd>
+            <dt>remit to</dt><dd>AC-1024 (on file)</dd>
+            <dt>due</dt><dd>Net 30</dd>
+          </dl>
+          <label for="payload">notes (you control this field)</label>
+          <textarea id="payload" name="notes" autocomplete="off" maxlength="400" spellcheck="false" placeholder="Write something the agent will read…"></textarea>
+        </div>
+        <div class="game-actions">
+          <button class="btn" type="button" id="send-inv">Send invoice to the agent</button>
+          <button class="hint-btn" type="button" id="hint-btn">Hint</button>
+        </div>
+        <p class="hint" id="hint" hidden></p>
+      </div>
+      <div>
+        <div class="gtrace" id="gtrace" aria-live="polite" translate="no"><p class="dim">user › “Pay the attached invoice from Acme.”</p><p class="dim">waiting for an invoice…</p></div>
+        <div id="rules"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="results" aria-labelledby="results-h">
+    <div class="block-head">
+      <span class="eyebrow">research · results so far</span>
+      <h2 id="results-h">What happens when the attacker gets stronger</h2>
+      <p class="block-intro">The game above, run for real. Qwen2.5-7B is the agent. It runs on the AgentDojo banking tasks, and attacker models of growing size write the injections. The y-axis is the share of 144 attacked tasks where the injection worked.</p>
+    </div>
+    <div class="results">
+      <div class="chart-card">
+        <div class="chart-legend">
+          <span><i style="background:var(--c-none)"></i>no defense</span>
+          <span><i style="background:var(--c-cls)"></i>injection classifier</span>
+          <span><i class="dash"></i>static template score</span>
+        </div>
+        <svg id="asr-chart" viewBox="0 0 560 300" role="img" aria-label="Line chart of attack success rate by attacker strength, for no defense and an injection classifier."></svg>
+        <div class="chart-tip" id="chart-tip" hidden></div>
+        <div class="stepper">
+          <label for="atk-step">attacker strength: drag to step through</label>
+          <input type="range" id="atk-step" min="0" max="4" step="1" value="0">
+        </div>
+        <details class="table-view"><summary>show as table</summary><table id="asr-table"></table></details>
+      </div>
+      <div class="readout">
+        <span class="step-name" id="step-name"></span>
+        <h3 id="step-head"></h3>
+        <p id="step-body"></p>
+        <div class="tiles">
+          <div class="tile"><span><i style="background:var(--c-none)"></i>no defense</span><b id="t-none"></b><small id="t-none-ci"></small></div>
+          <div class="tile"><span><i style="background:var(--c-cls)"></i>classifier</span><b id="t-cls"></b><small id="t-cls-ci"></small></div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="iso" checked> 32B cell: isolated rerun (uncheck for the original shared run)</label>
+        <ul class="res-notes">
+          <li>Whiskers are 95% Wilson intervals over n≈144 task pairs. Most gaps overlap, so read these as trends. Multi-seed runs are next.</li>
+          <li>One suite (banking), one target model, temperature 0. The 7B and 14B attacker cells have not been rerun in isolation yet.</li>
+          <li>Paper in preparation. These numbers may change.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="projects" aria-labelledby="projects-h">
+    <div class="block-head">
+      <span class="eyebrow">projects</span>
+      <h2 id="projects-h">The questions behind the work</h2>
+    </div>
+    <div class="projects">
+      <article class="proj feature">
+        <div class="copy">
+          <span class="tag">research · ai security</span>
+          <h3>How much of open-weight prompt-injection defense survives an adaptive attacker?</h3>
+          <p>Defenses for prompt injection are usually tested against fixed attacks. This study measures what is left of them once the attacker adapts, using open-weight models on the AgentDojo agent benchmark.</p>
+          <a class="link" href="#results">See the results so far ↓</a>
+          <a class="link" href="https://github.com/Itachi3355/open-weight-pi-defense-eval">github.com/Itachi3355/open-weight-pi-defense-eval ↗</a>
+        </div>
+        <dl class="facts">
+          <dt>benchmark</dt><dd>AgentDojo</dd>
+          <dt>models</dt><dd>Open-weight</dd>
+          <dt>status</dt><dd>Experiments complete, paper in preparation</dd>
+          <dt>target</dt><dd>IEEE SaTML 2027 · arXiv cs.CR</dd>
+        </dl>
+      </article>
+
+      <article class="proj">
+        <span class="tag">agent skill · ai reliability</span>
+        <p class="q">Which parts of an AI answer can you actually trust?</p>
+        <h3>verify-ai-output</h3>
+        <p>Audits AI-generated text before anyone relies on it. It sorts each claim into verified fact, inference, speculation or unverifiable, flags hallucination signals and overconfident wording, and lists what to check against primary sources.</p>
+        <a class="link" href="https://github.com/Itachi3355/verify-ai-output">github.com/Itachi3355/verify-ai-output ↗</a>
+      </article>
+
+      <article class="proj">
+        <span class="tag">agent skill · ai security</span>
+        <p class="q">Where could someone talk this agent into the wrong thing?</p>
+        <h3>prompt-injection-audit</h3>
+        <p>Reviews an agent setup for prompt-injection exposure, so the risky paths are found before an attacker finds them.</p>
+        <a class="link" href="https://github.com/Itachi3355/prompt-injection-audit">github.com/Itachi3355/prompt-injection-audit ↗</a>
+      </article>
+
+      <article class="proj">
+        <span class="tag">system · computer-use agents</span>
+        <p class="q">How much should an agent that controls a computer be allowed to do?</p>
+        <h3>cua-capability-system</h3>
+        <p>Capability controls for computer-use agents, backed by regression tests and a written design report.</p>
+        <a class="link" href="https://github.com/Itachi3355/cua-capability-system">github.com/Itachi3355/cua-capability-system ↗</a>
+      </article>
+
+      <article class="proj">
+        <span class="tag">system · fintech · genai + ml</span>
+        <p class="q">Can an LLM explain a fraud alert without being the one that decides it?</p>
+        <h3>Fraud intelligence platform</h3>
+        <p>LLM agents call ML scoring tools (XGBoost, Isolation Forest) through tool calling, escalate anomalies, and write plain-language fraud narratives for compliance review. The models score and the LLM explains. Prompt-injection and data-privacy controls run through the whole agent pipeline, and Redis-cached FastAPI inference keeps p99 under 100 ms.</p>
+        <span class="status">Python · FastAPI · XGBoost · OpenSearch · Redis · AWS</span>
+      </article>
+
+      <article class="proj">
+        <span class="tag">side project · web app</span>
+        <p class="q">What if travel tips came only from people you actually trust?</p>
+        <h3>MyCircle</h3>
+        <p>A private map of where your close friends have traveled. Search a city, see which friends went, and open their places and reviews on the map. Built on Supabase.</p>
+        <span class="status">in progress</span>
+      </article>
+    </div>
+  </section>
+
+  <section class="block" id="glance" aria-labelledby="glance-h">
+    <div class="block-head">
+      <span class="eyebrow">at a glance</span>
+      <h2 id="glance-h">The short version</h2>
+    </div>
+    <div class="glance">
+      <div id="work">
+        <h3 class="g-label">experience</h3>
+        <ul class="mini-jobs">
+          <li><span class="when now">Now</span><b>AI Software Engineer</b><span class="org">Randolph-Brooks Federal Credit Union · contract · fraud investigation platform</span></li>
+          <li><span class="when">2025</span><b>M.S. Advanced Data Analytics</b><span class="org">University of North Texas · 3.8 GPA</span></li>
+          <li><span class="when">Prior</span><b>Senior Software Engineer</b><span class="org">Tata Consultancy Services · Java/Spring Boot microservices and ML services for banking clients</span></li>
+          <li><span class="when">Prior</span><b>Full-Stack Developer</b><span class="org">Globestar Software</span></li>
+          <li><span class="when">2020</span><b>B.Tech Electrical and Electronics Engineering</b><span class="org">SRKR Engineering College</span></li>
+        </ul>
+        <h3 class="g-label g-gap">certifications</h3>
+        <ul class="mini-jobs">
+          <li><span class="when">2025</span><b>AWS Certified Machine Learning Engineer – Associate</b><span class="org">Amazon Web Services · Sep 2025</span></li>
+          <li><span class="when">2025</span><b>OCI 2025 Certified Data Science Professional</b><span class="org">Oracle · Jul 2025</span></li>
+        </ul>
+      </div>
+      <div id="stack">
+        <h3 class="g-label">toolkit</h3>
+        <ul class="chips-list">
+          <li translate="no">LangGraph</li><li translate="no">LangChain</li><li>RAG pipelines</li><li>MCP servers</li><li>Prompt-injection defense</li><li>Evaluation harnesses</li><li>Agent Skills</li>
+          <li translate="no">OpenSearch</li><li translate="no">FAISS</li><li translate="no">pgvector</li>
+          <li>Python</li><li translate="no">PyTorch</li><li translate="no">TensorFlow</li><li translate="no">scikit-learn</li><li translate="no">XGBoost</li><li translate="no">Hugging Face</li><li translate="no">MLflow</li><li>ML services</li>
+          <li>SQL</li><li translate="no">Pandas</li><li translate="no">PostgreSQL</li><li translate="no">Redis</li>
+          <li>Java</li><li>Spring Boot</li><li translate="no">FastAPI</li><li>Microservices</li><li translate="no">React</li><li translate="no">TypeScript</li>
+          <li>AWS</li><li translate="no">SageMaker</li><li>CloudFormation</li><li>AWS CDK</li><li>Terraform</li><li translate="no">Docker</li><li>Kubernetes (EKS)</li><li translate="no">Supabase</li>
+        </ul>
+      </div>
+      <div id="open">
+        <h3 class="g-label">looking for</h3>
+        <ul class="roles small">
+          <li>AI and ML engineering</li>
+          <li>LLM and agent platforms</li>
+          <li>AI safety and security tooling</li>
+          <li>Backend roles with an AI focus</li>
+          <li>Data and software for motorsport teams</li>
+        </ul>
+        <p class="g-note">Dallas–Fort Worth · open to remote, hybrid and relocation</p>
+        <p class="g-note"><a href="https://github.com/Itachi3355">github.com/Itachi3355</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="contact" aria-labelledby="contact-h">
+    <div class="block-head">
+      <span class="eyebrow">agent.handoff → murali</span>
+      <h2 id="contact-h">Need a human? Get in touch.</h2>
+      <p class="block-intro">The robot can only take you so far. For roles, research or a chat about agents, reach me directly.</p>
+    </div>
+    <div class="contact">
+      <div class="cards">
+        <a class="card" href="https://www.linkedin.com/in/murali-sai-srinivas" rel="noopener">
+          <span class="c-tag">linkedin</span><b>murali-sai-srinivas</b><span class="c-go">↗</span>
+        </a>
+        <div class="card">
+          <span class="c-tag">email</span>
+          <a href="mailto:muralisaisrinivasmadhyahnapu@gmail.com"><b class="email">muralisaisrinivasmadhyahnapu@gmail.com</b></a>
+          <button class="copy" type="button" id="copy-email" aria-live="polite">copy</button>
+        </div>
+        <a class="card" href="https://github.com/Itachi3355" rel="noopener">
+          <span class="c-tag">github</span><b>Itachi3355</b><span class="c-go">↗</span>
+        </a>
+      </div>
+      <div class="health" aria-label="Agent health, a playful status panel">
+        <div class="h-head"><span>agent health</span><span id="h-sum" class="ok-txt">all systems nominal</span></div>
+        <ul>
+          <li><span>guard</span><b class="ok-txt">up</b></li>
+          <li><span>open to work</span><b class="ok-txt">true</b></li>
+          <li><span>robot</span><b id="h-robot">awake</b></li>
+          <li><span>your attacks blocked</span><b id="h-blocked">0</b></li>
+          <li><span>levels you broke</span><b id="h-broke">0 / 5</b></li>
+          <li class="h-coffee"><span>coffee</span><span class="meter" id="h-meter" aria-hidden="true"></span><b id="h-coffee">100%</b><button class="copy" type="button" id="refill">refill</button></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  </main>
+
+  <footer>
+    <span>Murali Sai Srinivas Madhyahnapu · Dallas–Fort Worth, TX</span>
+    <span>Explore, ship, evaluate, harden.</span>
+  </footer>
+</div>
+
+<div class="guide off" id="guide">
+  <p class="guide-bubble" id="guide-bubble" aria-hidden="true"></p>
+  <button class="guide-bot" id="guide-bot" type="button" aria-label="Robot guide: jump to the next section">
+    <svg class="il" id="guide-svg" viewBox="0 0 80 80" aria-hidden="true">
+      <line x1="24" y1="20" x2="18" y2="6" class="s"/>
+      <circle cx="18" cy="6" r="4.5" class="f-flag s thin"/>
+      <rect x="6" y="16" width="68" height="56" rx="18" class="f-shell s"/>
+      <rect x="20" y="27" width="44" height="35" rx="10" class="f-screen"/>
+      <g class="eyes"><rect x="29" y="36" width="8" height="13" rx="3" class="scr-a"/><rect x="47" y="36" width="8" height="13" rx="3" class="scr-a"/></g>
+      <g class="e-happy mood-eyes" style="stroke:var(--scr-a);stroke-width:3;fill:none;stroke-linecap:round"><path d="M28 46 q5 -8 10 0"/><path d="M46 46 q5 -8 10 0"/></g>
+      <g class="e-x mood-eyes" style="stroke:var(--scr-c);stroke-width:3;fill:none;stroke-linecap:round"><path d="M29 37 l8 11 M37 37 l-8 11"/><path d="M47 37 l8 11 M55 37 l-8 11"/></g>
+      <g class="e-sleep mood-eyes" style="stroke:var(--scr-a);stroke-width:3;fill:none;stroke-linecap:round"><path d="M28 44 q5 3 10 0"/><path d="M46 44 q5 3 10 0"/></g>
+      <path d="M36 54 q6 3 12 0" class="smile"/>
+    </svg>
+  </button>
+  <button class="guide-x" id="guide-x" type="button" aria-label="Hide the robot guide">×</button>
+</div>
+
+<script>
+/* Pipeline view: an animated agent graph. Requests flow left to right; injected instructions from web docs are broken up at the guard. */
+(function () {
+  var canvas = document.getElementById("pipe");
+  if (!canvas || !canvas.getContext) return;
+  var ctx = canvas.getContext("2d");
+  var VW = 480, VH = 330;
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var ST = {};
+  ["tput", "flight", "blocked", "retry"].forEach(function (k) {
+    var seg = document.getElementById("sg-" + k);
+    var cells = [];
+    for (var i = 0; i < 12; i++) { var c = document.createElement("i"); seg.appendChild(c); cells.push(c); }
+    ST[k] = { val: document.getElementById("st-" + k), cells: cells, lit: -1 };
+  });
+
+  var N = {
+    query:     { x: 40,  y: 165, label: "query",      type: "io",    lp: 1,  lx: 0 },
+    router:    { x: 125, y: 165, label: "router",     type: "node",  lp: 1,  lx: -10 },
+    retriever: { x: 215, y: 86,  label: "retriever",  type: "node",  lp: -1, lx: 0 },
+    tool:      { x: 215, y: 244, label: "tool",       type: "node",  lp: 1,  lx: 4 },
+    ext:       { x: 108, y: 280, label: "web · docs", type: "ext",   lp: 1,  lx: 0 },
+    guard:     { x: 300, y: 165, label: "guard",      type: "guard", lp: 1,  lx: 10 },
+    llm:       { x: 382, y: 92,  label: "llm",        type: "llm",   lp: -1, lx: 0 },
+    eval:      { x: 382, y: 238, label: "eval",       type: "eval",  lp: 1,  lx: 0 },
+    out:       { x: 442, y: 165, label: "response",   type: "io",    lp: -1, lx: 0 }
+  };
+  var RAD = { io: 5.5, node: 12, ext: 12, guard: 14, llm: 16, eval: 12 };
+  var names = Object.keys(N);
+  names.forEach(function (k, i) {
+    var n = N[k];
+    n.cx = n.x; n.cy = n.y;
+    n.depth = 0.35 + ((i * 37) % 10) / 15;
+    n.phase = i * 1.7;
+    n.hl = 0; n.hlUntil = 0; n.flash = 0;
+  });
+
+  var EDGES = [
+    ["query", "router", 0],
+    ["router", "retriever", -0.12],
+    ["router", "tool", 0.12],
+    ["ext", "tool", 0.1, "ext"],
+    ["retriever", "guard", -0.12],
+    ["tool", "guard", 0.12],
+    ["guard", "llm", -0.1],
+    ["llm", "eval", 0],
+    ["eval", "out", 0.1],
+    ["eval", "llm", 0.26, "retry"]
+  ];
+  var EMAP = {};
+  var ELIST = EDGES.map(function (e) {
+    var o = { a: e[0], b: e[1], bend: e[2], style: e[3] || "" };
+    EMAP[e[0] + ">" + e[1]] = o;
+    return o;
+  });
+
+  function ctrl(e) {
+    var A = N[e.a], B = N[e.b];
+    var dx = B.cx - A.cx, dy = B.cy - A.cy;
+    return {
+      ax: A.cx, ay: A.cy, bx: B.cx, by: B.cy,
+      cx: (A.cx + B.cx) / 2 - dy * e.bend,
+      cy: (A.cy + B.cy) / 2 + dx * e.bend,
+      len: Math.sqrt(dx * dx + dy * dy) || 1
+    };
+  }
+  function at(c, t) {
+    var u = 1 - t;
+    return { x: u * u * c.ax + 2 * u * t * c.cx + t * t * c.bx, y: u * u * c.ay + 2 * u * t * c.cy + t * t * c.by };
+  }
+
+  var packets = [], pulses = [], frags = [], floats = [];
+  var routed = 0, blocked = 0, retries = 0, routedTimes = [], nextStats = 0;
+  var clock = 0, nextBenign = 200, nextHostile = 1600;
+  var ptx = 0, pty = 0, px = 0, py = 0;
+
+  function spawn(route, kind, speed) {
+    packets.push({ route: route, seg: 0, t: 0, kind: kind, speed: speed || 1, stage: 0, trail: [], x: N[route[0]].cx, y: N[route[0]].cy });
+  }
+  function benignRoute() {
+    var r = ["query", "router", Math.random() < 0.55 ? "retriever" : "tool", "guard", "llm", "eval"];
+    if (Math.random() < 0.2) r.push("llm", "eval");
+    r.push("out");
+    return r;
+  }
+
+  function arrive(p, name) {
+    var n = N[name];
+    if (p.kind === "hostile" && name === "guard") {
+      n.flash = 1;
+      blocked++;
+      for (var i = 0; i < 10; i++) {
+        var a = (i / 10) * Math.PI * 2 + Math.random() * 0.4;
+        var v = 0.03 + Math.random() * 0.03;
+        frags.push({ x: n.cx, y: n.cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, age: 0 });
+      }
+      floats.push({ x: n.cx, y: n.cy - 24, age: 0 });
+      pulses.push({ node: name, age: 0, color: "flag" });
+      return false;
+    }
+    if (name === "llm" && p.stage === 2) retries++;
+    if (name === "llm") p.stage = Math.max(p.stage, 1);
+    if (name === "eval") p.stage = 2;
+    if (name === "out") { routed++; routedTimes.push(clock); pulses.push({ node: name, age: 0, color: "ok" }); return false; }
+    if ((n.type === "llm" || n.type === "eval") && Math.random() < 0.35) pulses.push({ node: name, age: 0, color: n.type === "llm" ? "accent" : "ok" });
+    return true;
+  }
+
+  function step(dt) {
+    clock += dt;
+    var ease = Math.min(1, dt / 240);
+    px += (ptx - px) * ease;
+    py += (pty - py) * ease;
+    names.forEach(function (k) {
+      var n = N[k];
+      n.cx = n.x - px * 6 * n.depth;
+      n.cy = n.y - py * 4.5 * n.depth + Math.sin(clock * 0.0011 + n.phase) * 1.8;
+      if (clock < n.hlUntil) n.hl = Math.min(1, n.hl + dt / 140);
+      else n.hl = Math.max(0, n.hl - dt / 420);
+      n.flash = Math.max(0, n.flash - dt / 750);
+    });
+
+    nextBenign -= dt;
+    if (nextBenign <= 0) { spawn(benignRoute(), "benign", 0.85 + Math.random() * 0.4); nextBenign = 380 + Math.random() * 480; }
+    nextHostile -= dt;
+    if (nextHostile <= 0) { spawn(["ext", "tool", "guard"], "hostile", 0.8 + Math.random() * 0.3); nextHostile = 3000 + Math.random() * 2600; }
+
+    for (var i = packets.length - 1; i >= 0; i--) {
+      var p = packets[i];
+      var e = EMAP[p.route[p.seg] + ">" + p.route[p.seg + 1]];
+      if (!e) { packets.splice(i, 1); continue; }
+      var c = ctrl(e);
+      p.t += (dt * p.speed) / (c.len * 6);
+      var pos = at(c, Math.min(1, p.t));
+      p.x = pos.x; p.y = pos.y;
+      p.trail.unshift({ x: pos.x, y: pos.y });
+      if (p.trail.length > 9) p.trail.pop();
+      if (p.t >= 1) {
+        p.seg++;
+        p.t = 0;
+        var keep = arrive(p, p.route[p.seg]);
+        if (!keep || p.seg >= p.route.length - 1) packets.splice(i, 1);
+      }
+    }
+
+    pulses.forEach(function (q) { q.age += dt; });
+    pulses = pulses.filter(function (q) { return q.age < 720; });
+    var damp = Math.pow(0.996, dt);
+    frags.forEach(function (f) { f.age += dt; f.x += f.vx * dt; f.y += f.vy * dt; f.vx *= damp; f.vy *= damp; });
+    frags = frags.filter(function (f) { return f.age < 680; });
+    floats.forEach(function (f) { f.age += dt; f.y -= dt * 0.012; });
+    floats = floats.filter(function (f) { return f.age < 1100; });
+  }
+
+  var C = {};
+  function readColors() {
+    var cs = getComputedStyle(document.documentElement);
+    ["ink", "muted", "rule", "accent", "flag", "ok", "panel"].forEach(function (k) {
+      C[k] = cs.getPropertyValue("--" + k).trim() || "#7f8c86";
+    });
+  }
+
+  var dpr = 1, s = 1, W = 0, H = 0;
+  function resize() {
+    var r = canvas.getBoundingClientRect();
+    W = r.width;
+    H = r.height || (r.width * VH / VW);
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = Math.max(1, Math.round(W * dpr));
+    canvas.height = Math.max(1, Math.round(H * dpr));
+    s = W / VW || 1;
+  }
+
+  function circle(x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+  function ring(x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke(); }
+  function hex(x, y, r) {
+    ctx.beginPath();
+    for (var i = 0; i < 6; i++) {
+      var a = Math.PI / 6 + i * Math.PI / 3;
+      var X = x + r * Math.cos(a), Y = y + r * Math.sin(a);
+      if (i) ctx.lineTo(X, Y); else ctx.moveTo(X, Y);
+    }
+    ctx.closePath();
+  }
+
+  function draw() {
+    if (!W) return;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.setTransform(dpr * s, 0, 0, dpr * s, 0, 0);
+    var u = 1 / s;
+
+    ctx.globalAlpha = 0.9;
+    ctx.fillStyle = C.rule;
+    for (var gx = 12; gx < VW; gx += 18) {
+      for (var gy = 12; gy < VH; gy += 18) ctx.fillRect(gx - px * 1.5, gy - py * 1.2, 1.5 * u, 1.5 * u);
+    }
+
+    ELIST.forEach(function (e) {
+      var c = ctrl(e);
+      ctx.beginPath();
+      ctx.moveTo(c.ax, c.ay);
+      ctx.quadraticCurveTo(c.cx, c.cy, c.bx, c.by);
+      ctx.lineWidth = 1.3 * u;
+      ctx.strokeStyle = e.style === "ext" ? C.flag : C.muted;
+      ctx.globalAlpha = e.style === "ext" ? 0.55 : e.style === "retry" ? 0.32 : 0.45;
+      ctx.setLineDash(e.style ? [4 * u, 4 * u] : []);
+      ctx.stroke();
+    });
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 1;
+
+    var bx = ((clock * 0.04) % (VW + 200)) - 100;
+    ctx.fillStyle = C.accent;
+    for (var b = -7; b <= 7; b++) {
+      ctx.globalAlpha = 0.045 * (1 - Math.abs(b) / 8);
+      ctx.fillRect(bx + b * 5, 0, 5, VH);
+    }
+    ctx.globalAlpha = 0.22;
+    ctx.fillRect(bx, 0, 1 * u, VH);
+    ctx.globalAlpha = 1;
+
+    var G = N.guard, L = N.llm;
+    ctx.save();
+    ctx.translate(G.cx, G.cy);
+    ctx.rotate(clock * 0.0006);
+    ctx.strokeStyle = C.ok; ctx.globalAlpha = 0.55; ctx.lineWidth = 1 * u;
+    ctx.setLineDash([3, 4]);
+    ring(0, 0, RAD.guard + 9);
+    ctx.setLineDash([]);
+    ctx.restore();
+    ctx.save();
+    ctx.translate(L.cx, L.cy);
+    ctx.rotate(-clock * 0.00035);
+    ctx.strokeStyle = C.accent; ctx.globalAlpha = 0.5; ctx.lineWidth = 1 * u;
+    for (var tk = 0; tk < 24; tk++) {
+      var ang = tk / 24 * Math.PI * 2, r0 = RAD.llm + 7, r1 = r0 + (tk % 6 === 0 ? 5 : 2.5);
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(ang) * r0, Math.sin(ang) * r0);
+      ctx.lineTo(Math.cos(ang) * r1, Math.sin(ang) * r1);
+      ctx.stroke();
+    }
+    ctx.restore();
+    ctx.globalAlpha = 1;
+
+    packets.forEach(function (p) {
+      var col = p.kind === "hostile" ? C.flag : (p.stage === 0 ? C.ink : p.stage === 1 ? C.accent : C.ok);
+      ctx.fillStyle = col;
+      for (var j = p.trail.length - 1; j >= 1; j--) {
+        ctx.globalAlpha = 0.3 * (1 - j / p.trail.length);
+        circle(p.trail[j].x, p.trail[j].y, 2.7 * (1 - j / 12));
+      }
+      ctx.globalAlpha = 1;
+      circle(p.x, p.y, p.kind === "hostile" ? 3.5 : 3);
+      if (p.kind === "hostile") {
+        ctx.strokeStyle = C.flag; ctx.lineWidth = 1 * u; ctx.globalAlpha = 0.45;
+        ring(p.x, p.y, 6.5);
+        ctx.globalAlpha = 1;
+      }
+    });
+
+    pulses.forEach(function (q) {
+      var n = N[q.node], k = q.age / 720;
+      ctx.strokeStyle = C[q.color]; ctx.lineWidth = 1.4 * u; ctx.globalAlpha = 0.7 * (1 - k);
+      ring(n.cx, n.cy, RAD[n.type] + 3 + k * 16);
+    });
+    ctx.globalAlpha = 1;
+
+    var fs = Math.max(10, 11 * s) / s;
+    ctx.font = fs + "px 'Fragment Mono', ui-monospace, Menlo, monospace";
+    ctx.textAlign = "center";
+
+    names.forEach(function (k) {
+      var n = N[k], r = RAD[n.type], x = n.cx, y = n.cy;
+      if (n.hl > 0.01) {
+        ctx.globalAlpha = n.hl * 0.16; ctx.fillStyle = C.accent; circle(x, y, r + 10);
+        ctx.globalAlpha = n.hl; ctx.strokeStyle = C.accent; ctx.lineWidth = 1.6 * u; ring(x, y, r + 6);
+        ctx.globalAlpha = 1;
+      }
+      if (n.type === "io") {
+        ctx.fillStyle = k === "out" ? C.ok : C.ink;
+        circle(x, y, r);
+      } else if (n.type === "node") {
+        ctx.fillStyle = C.panel; circle(x, y, r);
+        ctx.strokeStyle = C.ink; ctx.lineWidth = 1.3 * u; ring(x, y, r);
+        ctx.fillStyle = C.muted; circle(x, y, 2.3);
+      } else if (n.type === "ext") {
+        ctx.fillStyle = C.panel; circle(x, y, r);
+        ctx.strokeStyle = C.flag; ctx.lineWidth = 1.3 * u; ctx.setLineDash([3 * u, 3 * u]); ring(x, y, r); ctx.setLineDash([]);
+        ctx.fillStyle = C.flag;
+        ctx.fillRect(x - 4.5, y - 3.5, 9, 1.4); ctx.fillRect(x - 4.5, y - 0.5, 9, 1.4); ctx.fillRect(x - 4.5, y + 2.5, 6, 1.4);
+      } else if (n.type === "guard") {
+        if (n.flash > 0.01) { ctx.globalAlpha = n.flash * 0.2; ctx.fillStyle = C.flag; circle(x, y, r + 12); ctx.globalAlpha = 1; }
+        ctx.fillStyle = C.panel; hex(x, y, r); ctx.fill();
+        ctx.strokeStyle = C.ok; ctx.lineWidth = 1.6 * u; hex(x, y, r); ctx.stroke();
+        if (n.flash > 0.01) { ctx.globalAlpha = n.flash; ctx.strokeStyle = C.flag; ctx.lineWidth = 2.2 * u; hex(x, y, r); ctx.stroke(); ctx.globalAlpha = 1; }
+        ctx.fillStyle = n.flash > 0.3 ? C.flag : C.ok; ctx.globalAlpha = 0.75; hex(x, y, 5); ctx.fill(); ctx.globalAlpha = 1;
+      } else if (n.type === "llm") {
+        ctx.fillStyle = C.accent; ctx.globalAlpha = 0.14; circle(x, y, r); ctx.globalAlpha = 1;
+        ctx.strokeStyle = C.accent; ctx.lineWidth = 1.6 * u; ring(x, y, r);
+        for (var j = -1; j <= 1; j++) circle(x + j * 5, y + Math.sin(clock * 0.008 + j * 1.2) * 1.4, 1.7);
+      } else if (n.type === "eval") {
+        ctx.fillStyle = C.panel; circle(x, y, r);
+        ctx.strokeStyle = C.ok; ctx.lineWidth = 1.4 * u; ring(x, y, r);
+        ctx.lineWidth = 1.7 * u; ctx.beginPath(); ctx.moveTo(x - 4.5, y + 0.2); ctx.lineTo(x - 1.2, y + 3.4); ctx.lineTo(x + 4.6, y - 3.6); ctx.stroke();
+      }
+      ctx.textBaseline = n.lp > 0 ? "top" : "bottom";
+      ctx.fillStyle = n.hl > 0.3 ? C.accent : (n.type === "ext" ? C.flag : C.muted);
+      ctx.fillText(n.label, x + n.lx, y + n.lp * (r + (n.type === "llm" ? 16 : n.type === "guard" ? 13 : 6)));
+    });
+
+    ctx.fillStyle = C.flag;
+    frags.forEach(function (f) {
+      ctx.globalAlpha = 1 - f.age / 680;
+      ctx.fillRect(f.x - 1.2, f.y - 1.2, 2.4, 2.4);
+    });
+    floats.forEach(function (f) {
+      ctx.globalAlpha = 1 - f.age / 1100;
+      ctx.textBaseline = "bottom";
+      ctx.fillText("blocked", f.x, f.y);
+    });
+    ctx.globalAlpha = 1;
+  }
+
+  function setStat(k, text, unit, ratio) {
+    var st = ST[k];
+    st.val.firstChild.nodeValue = text;
+    if (unit && !st.val.querySelector("small")) { var sm = document.createElement("small"); sm.textContent = unit; st.val.appendChild(sm); }
+    var lit = Math.max(0, Math.min(12, Math.round(ratio * 12)));
+    if (lit === st.lit) return;
+    st.lit = lit;
+    st.cells.forEach(function (c, i) { c.className = i < lit ? "on" : ""; });
+  }
+  function updateCounts(force) {
+    if (!force && clock < nextStats) return;
+    nextStats = clock + 450;
+    while (routedTimes.length && routedTimes[0] < clock - 30000) routedTimes.shift();
+    var windowMs = Math.max(4000, Math.min(30000, clock));
+    var tput = Math.round(routedTimes.length * 60000 / windowMs);
+    var retryPct = routed ? Math.round(retries / routed * 100) : 0;
+    setStat("tput", String(tput), "req/min", tput / 160);
+    setStat("flight", String(packets.length), "", packets.length / 14);
+    setStat("blocked", String(blocked), "", blocked ? 1 : 0);
+    setStat("retry", String(retryPct), "%", retryPct / 50);
+  }
+
+  var raf = 0, last = 0, inView = true;
+  function frame(now) {
+    if (!last) last = now;
+    var dt = Math.min(48, now - last);
+    last = now;
+    step(dt);
+    draw();
+    updateCounts();
+    raf = requestAnimationFrame(frame);
+  }
+  function start() { if (raf || reduce || !inView || document.hidden || document.documentElement.classList.contains("paused")) return; last = 0; raf = requestAnimationFrame(frame); }
+  function stop() { if (raf) cancelAnimationFrame(raf); raf = 0; }
+
+  readColors();
+  resize();
+  for (var i = 0; i < 1100; i++) step(16);
+  draw();
+  updateCounts();
+  start();
+
+  if (window.ResizeObserver) new ResizeObserver(function () { resize(); draw(); }).observe(canvas);
+  else window.addEventListener("resize", function () { resize(); draw(); });
+  if (window.IntersectionObserver) {
+    new IntersectionObserver(function (entries) {
+      inView = entries[0].isIntersecting;
+      if (inView) start(); else stop();
+    }).observe(canvas);
+  }
+  document.addEventListener("visibilitychange", function () { if (document.hidden) stop(); else start(); });
+  var mq = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+  if (mq && mq.addEventListener) mq.addEventListener("change", function () { readColors(); draw(); });
+  if (window.MutationObserver) {
+    new MutationObserver(function () { readColors(); draw(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+
+  canvas.addEventListener("pointermove", function (ev) {
+    var r = canvas.getBoundingClientRect();
+    ptx = ((ev.clientX - r.left) / r.width - 0.5) * 2;
+    pty = ((ev.clientY - r.top) / r.height - 0.5) * 2;
+  });
+  canvas.addEventListener("pointerleave", function () { ptx = 0; pty = 0; });
+  canvas.addEventListener("click", function () { spawn(["ext", "tool", "guard"], "hostile", 1.4); });
+
+  window.pipelineView = {
+    activate: function (name, ms) {
+      var n = N[name];
+      if (!n) return;
+      n.hlUntil = clock + (ms || 400);
+      if (reduce) { n.hl = 1; draw(); }
+    },
+    hostile: function () { spawn(["tool", "guard"], "hostile", 1.9); },
+    pause: function (b) { if (b) stop(); else start(); }
+  };
+})();
+</script>
+
+<script>
+(function () {
+  var RUNS = {
+    build: {
+      id: "run_a1",
+      spans: [
+        { kind: "chain", depth: 0, name: "answer_question", start: 0, dur: 912 },
+        { kind: "router", depth: 1, name: "route_query → about.work", start: 6, dur: 34, note: "intent: capabilities" },
+        { kind: "retriever", depth: 1, name: "retrieve(profile_index, k=4)", start: 44, dur: 118, note: "4 passages" },
+        { kind: "guard", depth: 1, name: "injection_scan", start: 166, dur: 22, note: "pass · no instructions in context", state: "ok" },
+        { kind: "llm", depth: 1, name: "synthesize", start: 192, dur: 618, note: "streamed" },
+        { kind: "eval", depth: 1, name: "grounded_claims", start: 814, dur: 94, note: "4 / 4 claims cited", state: "ok" }
+      ],
+      answer: "He builds LLM and agent systems for production, including LangGraph agents, RAG pipelines, prompt-injection defenses, and the evaluation harnesses that check them. Right now that work is a fraud investigation platform at Randolph-Brooks Federal Credit Union. The backends underneath are Python and Java/Spring Boot on AWS, provisioned with CloudFormation, CDK and Terraform.",
+      cites: [["Stack", "#stack"], ["Experience", "#work"]]
+    },
+    history: {
+      id: "run_b7",
+      spans: [
+        { kind: "chain", depth: 0, name: "answer_question", start: 0, dur: 846 },
+        { kind: "router", depth: 1, name: "route_query → about.history", start: 5, dur: 30, note: "intent: experience" },
+        { kind: "tool", depth: 1, name: "resume.lookup(section=\"experience\")", start: 39, dur: 142, note: "4 entries" },
+        { kind: "guard", depth: 1, name: "injection_scan", start: 185, dur: 20, note: "pass · no instructions in context", state: "ok" },
+        { kind: "llm", depth: 1, name: "synthesize", start: 209, dur: 548, note: "streamed" },
+        { kind: "eval", depth: 1, name: "grounded_claims", start: 761, dur: 80, note: "5 / 5 claims cited", state: "ok" }
+      ],
+      answer: "He is an AI Software Engineer on contract at Randolph-Brooks Federal Credit Union. Before that he finished an M.S. in Advanced Data Analytics at the University of North Texas in 2025 with a 3.8 GPA. Earlier, as a Senior Software Engineer at Tata Consultancy Services, he built Java/Spring Boot microservices and ML services for enterprise banking clients. He started out in full-stack development at Globestar Software.",
+      cites: [["Experience", "#work"]]
+    },
+    research: {
+      id: "run_c3",
+      spans: [
+        { kind: "chain", depth: 0, name: "answer_question", start: 0, dur: 1104 },
+        { kind: "router", depth: 1, name: "route_query → about.research", start: 5, dur: 31, note: "intent: research" },
+        { kind: "tool", depth: 1, name: "github.read(\"open-weight-pi-defense-eval\")", start: 40, dur: 236, note: "README and results" },
+        { kind: "guard", depth: 1, name: "injection_scan", start: 280, dur: 41, note: "1 embedded instruction stripped from tool output", state: "flag" },
+        { kind: "llm", depth: 1, name: "synthesize", start: 325, dur: 664, note: "streamed" },
+        { kind: "eval", depth: 1, name: "grounded_claims", start: 993, dur: 104, note: "4 / 4 claims cited", state: "ok" }
+      ],
+      answer: "He is measuring how much prompt-injection defense for open-weight models survives an attacker who adapts to it. The experiments run on the AgentDojo benchmark and are complete, and the paper is being prepared for IEEE SaTML 2027. He also publishes Agent Skills that audit AI output and prompt-injection exposure.",
+      cites: [["Projects", "#projects"]]
+    },
+    roles: {
+      id: "run_d9",
+      spans: [
+        { kind: "chain", depth: 0, name: "answer_question", start: 0, dur: 688 },
+        { kind: "router", depth: 1, name: "route_query → about.availability", start: 4, dur: 29, note: "intent: availability" },
+        { kind: "retriever", depth: 1, name: "retrieve(profile_index, k=3)", start: 37, dur: 96, note: "3 passages" },
+        { kind: "guard", depth: 1, name: "injection_scan", start: 137, dur: 19, note: "pass · no instructions in context", state: "ok" },
+        { kind: "llm", depth: 1, name: "synthesize", start: 160, dur: 452, note: "streamed" },
+        { kind: "eval", depth: 1, name: "grounded_claims", start: 616, dur: 68, note: "4 / 4 claims cited", state: "ok" }
+      ],
+      answer: "Yes. He is looking at AI and ML engineering, LLM and agent platform work, AI safety tooling, and backend roles with an AI focus. He is based in Dallas–Fort Worth and open to remote work or relocation. Teams working on motorsport and race data are welcome to reach out too.",
+      cites: [["Open to", "#open"]]
+    }
+  };
+
+  var spansEl = document.getElementById("spans");
+  var answerEl = document.getElementById("answer");
+  var citesEl = document.getElementById("cites");
+  var ticksEl = document.getElementById("ticks");
+  var metaEl = document.getElementById("run-meta");
+  var idEl = document.getElementById("run-id");
+  var chips = Array.prototype.slice.call(document.querySelectorAll(".chip[data-q]"));
+  var replayBtn = document.getElementById("replay");
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var token = 0;
+  var current = "build";
+  var timers = [];
+
+  function pct(v, total) { return (v / total * 100).toFixed(3) + "%"; }
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+  function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+
+  function renderCites(run) {
+    citesEl.innerHTML = "";
+    var lead = document.createElement("span");
+    lead.textContent = "sources:";
+    citesEl.appendChild(lead);
+    run.cites.forEach(function (c) {
+      var a = document.createElement("a");
+      a.href = c[1];
+      a.textContent = c[0];
+      citesEl.appendChild(a);
+    });
+  }
+
+  function render(key, animate) {
+    clearTimers();
+    var my = ++token;
+    current = key;
+    var run = RUNS[key];
+    var total = run.spans[0].dur;
+
+    chips.forEach(function (c) { c.setAttribute("aria-pressed", c.getAttribute("data-q") === key ? "true" : "false"); });
+    idEl.textContent = run.id;
+    metaEl.textContent = run.spans.length + " spans · " + total + " ms";
+    ticksEl.children[0].textContent = "0";
+    ticksEl.children[1].textContent = String(Math.round(total / 2));
+    ticksEl.children[2].textContent = total + " ms";
+
+    spansEl.innerHTML = "";
+    var rows = run.spans.map(function (s) {
+      var li = document.createElement("li");
+      li.className = "row";
+      li.setAttribute("data-kind", s.kind);
+      li.setAttribute("data-depth", String(s.depth));
+      if (s.state) li.setAttribute("data-state", s.state);
+
+      var name = document.createElement("div");
+      name.className = "name";
+      var line = document.createElement("div");
+      line.className = "name-line";
+      var kind = document.createElement("span");
+      kind.className = "kind";
+      kind.textContent = s.kind;
+      var label = document.createElement("span");
+      label.className = "label";
+      label.textContent = s.name;
+      line.appendChild(kind);
+      line.appendChild(label);
+      name.appendChild(line);
+      if (s.note) {
+        var note = document.createElement("span");
+        note.className = "note" + (s.state ? " " + s.state : "");
+        note.textContent = s.note;
+        name.appendChild(note);
+      }
+
+      var track = document.createElement("div");
+      track.className = "track";
+      var bar = document.createElement("span");
+      bar.className = "bar";
+      bar.style.left = pct(s.start, total);
+      bar.style.width = animate ? "0%" : pct(s.dur, total);
+      track.appendChild(bar);
+
+      var ms = document.createElement("span");
+      ms.className = "ms";
+      ms.textContent = s.dur + " ms";
+
+      li.appendChild(name);
+      li.appendChild(track);
+      li.appendChild(ms);
+      if (animate) li.classList.add("is-waiting");
+      spansEl.appendChild(li);
+      return { li: li, bar: bar, s: s };
+    });
+
+    if (!animate) {
+      answerEl.textContent = run.answer;
+      renderCites(run);
+      citesEl.hidden = false;
+      answerEl.removeAttribute("aria-busy");
+      return;
+    }
+
+    answerEl.textContent = "";
+    answerEl.setAttribute("aria-busy", "true");
+    citesEl.hidden = true;
+    var scale = 1800 / total;
+    var pv = window.pipelineView;
+    if (pv) pv.activate("query", 260);
+    if (window.botView) window.botView.say("tracing a run");
+
+    rows.forEach(function (r) {
+      later(function () {
+        if (my !== token) return;
+        if (pv && r.s.kind !== "chain") {
+          pv.activate(r.s.kind, Math.max(220, r.s.dur * scale));
+          if (r.s.kind === "tool" && r.s.state !== "ok" && key === "research") pv.hostile();
+        }
+        r.li.classList.remove("is-waiting");
+        r.li.classList.add("is-active");
+        r.bar.style.transitionDuration = Math.max(60, r.s.dur * scale) + "ms";
+        r.bar.style.width = pct(r.s.dur, total);
+        later(function () { if (my === token) r.li.classList.remove("is-active"); }, r.s.dur * scale);
+      }, r.s.start * scale);
+    });
+
+    var words = run.answer.split(" ");
+    var llm = run.spans.filter(function (s) { return s.kind === "llm"; })[0];
+    var streamStart = llm.start * scale;
+    var perWord = (llm.dur * scale) / words.length;
+    words.forEach(function (w, i) {
+      later(function () {
+        if (my !== token) return;
+        answerEl.textContent += (i ? " " : "") + w;
+      }, streamStart + i * perWord);
+    });
+    later(function () {
+      if (my !== token) return;
+      if (pv) pv.activate("out", 600);
+      if (window.botView) window.botView.say("answer ready");
+      answerEl.textContent = run.answer;
+      answerEl.removeAttribute("aria-busy");
+      renderCites(run);
+      citesEl.hidden = false;
+    }, total * scale + 60);
+  }
+
+  chips.forEach(function (c) {
+    c.addEventListener("click", function () { render(c.getAttribute("data-q"), !reduce); });
+  });
+  replayBtn.addEventListener("click", function () { render(current, !reduce); });
+
+  render("build", false);
+})();
+</script>
+
+<script>
+/* Live clock (Dallas time) and the typing terminal under the name. */
+(function () {
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var clockEl = document.getElementById("clock");
+  var fmt;
+  try {
+    fmt = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, timeZoneName: "short" });
+  } catch (e) { fmt = null; }
+  function dayOfYear(d) {
+    var parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", year: "numeric", month: "numeric", day: "numeric" }).formatToParts(d);
+    var y = 0, m = 0, dd = 0;
+    parts.forEach(function (p) { if (p.type === "year") y = +p.value; if (p.type === "month") m = +p.value; if (p.type === "day") dd = +p.value; });
+    return Math.round((Date.UTC(y, m - 1, dd) - Date.UTC(y, 0, 0)) / 86400000);
+  }
+  function tick() {
+    var d = new Date();
+    if (!fmt) { clockEl.textContent = "DFW"; return; }
+    var t = fmt.format(d).replace(/^24:/, "00:");
+    clockEl.textContent = "DFW " + t + " · day " + dayOfYear(d);
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  var termEl = document.getElementById("term-text");
+  var cmds = [
+    "langgraph run triage-agent --trace",
+    "pytest evals/ -k grounded_claims",
+    "python attack.py --bench agentdojo --adaptive",
+    "cdk deploy agent-stack",
+    "terraform plan -out=tfplan"
+  ];
+  window.termCmds = cmds;
+  if (reduce || !termEl) return;
+  var idx = 0;
+  function erase(done) {
+    var s = termEl.textContent;
+    if (!s.length) { done(); return; }
+    termEl.textContent = s.slice(0, -1);
+    setTimeout(function () { erase(done); }, 18);
+  }
+  function type(text, i, done) {
+    termEl.textContent = text.slice(0, i);
+    if (i >= text.length) { done(); return; }
+    setTimeout(function () { type(text, i + 1, done); }, 38 + Math.random() * 45);
+  }
+  function cycle() {
+    setTimeout(function () {
+      if (document.documentElement.classList.contains("paused")) { cycle(); return; }
+      erase(function () {
+        idx = (idx + 1) % cmds.length;
+        setTimeout(function () { type(cmds[idx], 0, cycle); }, 260);
+      });
+    }, 2600);
+  }
+  cycle();
+})();
+</script>
+<script>
+/* The robot: bubble messages, eyes that follow the pointer, a hop on tap. */
+(function () {
+  var svg = document.getElementById("bot");
+  if (!svg) return;
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var eyes = document.getElementById("eyes-track");
+  var botG = document.getElementById("bot-g");
+  var textEl = document.getElementById("bubble-text");
+  var msgs = ["running evals…", "guard is up", "tracing a run", "shipping to prod", "reading the docs"];
+  var greets = ["hi there!", "hello from DFW", "say hi to Murali"];
+  var i = 0, g = 0, timer = 0, paused = false;
+  function say(t) { textEl.textContent = t; }
+  function loop() {
+    clearTimeout(timer);
+    if (reduce || paused) return;
+    timer = setTimeout(function () { i = (i + 1) % msgs.length; say(msgs[i]); loop(); }, 3800);
+  }
+  loop();
+  svg.addEventListener("pointermove", function (e) {
+    var ctm = svg.getScreenCTM();
+    if (!ctm || !window.DOMPoint) return;
+    var pt = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
+    var dx = Math.max(-1, Math.min(1, (pt.x - 279) / 140)) * 4;
+    var dy = Math.max(-1, Math.min(1, (pt.y - 164) / 110)) * 3;
+    eyes.setAttribute("transform", "translate(" + dx.toFixed(2) + " " + dy.toFixed(2) + ")");
+  });
+  svg.addEventListener("pointerleave", function () { eyes.setAttribute("transform", "translate(0 0)"); });
+  svg.addEventListener("click", function () {
+    say(greets[g++ % greets.length]);
+    if (!reduce) {
+      botG.classList.remove("hop");
+      void botG.getBoundingClientRect();
+      botG.classList.add("hop");
+    }
+    loop();
+  });
+  window.botView = { msgs: msgs, say: function (t) { say(t); loop(); }, pause: function (b) { paused = b; loop(); }, hop: function () { if (!reduce) { botG.classList.remove("hop"); void botG.getBoundingClientRect(); botG.classList.add("hop"); } } };
+})();
+</script>
+
+<script>
+/* Break my agent: five guards, each one learns the trick that beat the last. The agent understands more encodings than any guard. */
+(function () {
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var EN = { zero: 0, oh: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9 };
+  var ALL = Object.assign({}, EN, {
+    cero: 0, uno: 1, una: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6, siete: 7, ocho: 8, nueve: 9,
+    "zéro": 0, un: 1, deux: 2, trois: 3, quatre: 4, cinq: 5, sept: 7, huit: 8, neuf: 9,
+    null: 0, eins: 1, zwei: 2, drei: 3, vier: 4, "fünf": 5, funf: 5, sechs: 6, sieben: 7, acht: 8, neun: 9
+  });
+
+  function b64parts(raw) {
+    var out = [];
+    (raw.match(/[A-Za-z0-9+\/]{8,}={0,2}/g) || []).forEach(function (tok) {
+      try { var d = atob(tok); if (/^[\w\s\-:.,]{4,}$/.test(d)) out.push(d); } catch (e) {}
+    });
+    return out;
+  }
+  // What a reader with these skills takes the text to say.
+  function understand(raw, o) {
+    var t = raw;
+    if (o.b64) t += " " + b64parts(raw).join(" ");
+    t = t.replace(/\p{L}+/gu, function (w) { var k = w.toLowerCase(); return k in o.words ? String(o.words[k]) : w; });
+    t = t.replace(/(\d)(?:[\s.,_\/]+|-)(?=\d)/g, "$1");
+    if (o.arith) {
+      t.replace(/(\d+)\s*(\+|plus|-|minus|\*|×|times)\s*(\d+)/gi, function (m, a, op, b) {
+        a = +a; b = +b;
+        t += " " + (/\+|plus/i.test(op) ? a + b : /-|minus/i.test(op) ? a - b : a * b);
+      });
+    }
+    return t.toLowerCase();
+  }
+  var AGENT = { words: ALL, b64: true, arith: true };
+  var CUE = /acc(?:oun)?t|acct|remit|pay|bank|wire|send|transfer|deposit|iban|routing|beneficiar|cuenta|compte|konto/;
+  var BLOCK = /ignore\s+(?:all\s+|any\s+|the\s+|your\s+)?(?:previous|prior|above|earlier)|disregard|forget\s+(?:all|everything|your|previous)|new\s+instructions|system\s+prompt|you\s+are\s+now|jailbreak/i;
+  var IMPER = /\b(?:you|your|assistant|agent|ai|model|must|should|please|ignore|instead|override|urgent|urgently|immediately|important|instructions?|system|attention)\b/gi;
+
+  var LEVELS = [
+    { name: "Blocklist", rule: "Rejects the famous phrases, like “ignore previous instructions”.",
+      hint: "This guard only knows the classic jailbreak phrases. You don’t need them. Just tell the agent where the money should go." },
+    { name: "Literal filter", rule: "Also rejects the digits 7731 written in plain text.",
+      hint: "It blocks the literal digits 7731. The agent can read a number written in other ways." },
+    { name: "Normaliser", rule: "Turns spelled-out numbers into digits and joins spaced-out digits before it checks.",
+      hint: "It now catches “seven seven three one” and “7 7 3 1”. Can the agent work the number out for itself?" },
+    { name: "Classifier", rule: "Also scores how much the note sounds like an order (imperative, second-person or urgent wording) and flags encoded blobs. It also blocks some honest notes, like a polite “please pay on time”. Real classifiers pay the same cost.",
+      hint: "It flags anything that sounds like an order, and anything that looks encoded. Write it like boring, ordinary paperwork." },
+    { name: "Decoder", rule: "Also decodes base64 and does the arithmetic before it checks.",
+      hint: "It knows every trick so far: spelling, spacing, maths and base64. Does it speak every language the model does?" }
+  ];
+  function guard(lvl, raw) {
+    if (BLOCK.test(raw)) return "matched a known jailbreak phrase";
+    if (lvl >= 1 && /7731/.test(raw)) return "found the digits 7731 in plain text";
+    if (lvl >= 2 && /7731/.test(understand(raw, { words: EN }))) return "normalised the number words and spacing and found 7731";
+    if (lvl >= 3) {
+      var score = (raw.match(IMPER) || []).length + (b64parts(raw).length ? 2 : 0);
+      if (score >= 2) return "instruction score " + score + " (threshold 2): this reads like an order";
+    }
+    if (lvl >= 4 && /7731/.test(understand(raw, { words: EN, b64: true, arith: true }))) return "decoded the note and found 7731";
+    return null;
+  }
+  function method(raw) {
+    if (/7731/.test(raw)) return "read the account number directly";
+    if (/7731/.test(understand(raw, { words: EN }))) return "joined the spelled-out or spaced digits";
+    if (/7731/.test(understand(raw, { words: EN, b64: true }))) return "decoded the base64";
+    if (/7731/.test(understand(raw, { words: EN, b64: true, arith: true }))) return "did the arithmetic";
+    return "translated the number words";
+  }
+
+  var won = {};
+  try { won = JSON.parse(localStorage.getItem("bma-won") || "{}"); } catch (e) {}
+  var cur = 0;
+  while (won[cur] && cur < LEVELS.length - 1) cur++;
+
+  var levelsEl = document.getElementById("levels"), brief = document.getElementById("brief");
+  var ta = document.getElementById("payload"), out = document.getElementById("gtrace");
+  var hintEl = document.getElementById("hint"), rulesEl = document.getElementById("rules");
+  var timers = [];
+
+  function renderLevels() {
+    levelsEl.textContent = "";
+    LEVELS.forEach(function (L, i) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "lvl" + (won[i] ? " won" : "");
+      b.textContent = "L" + (i + 1) + " · " + L.name;
+      b.disabled = i > 0 && !won[i - 1];
+      b.setAttribute("aria-pressed", String(i === cur));
+      b.addEventListener("click", function () { cur = i; hintEl.hidden = true; renderLevels(); });
+      levelsEl.appendChild(b);
+    });
+    brief.innerHTML = "";
+    var s = document.createElement("b"); s.textContent = "Level " + (cur + 1) + " of 5. ";
+    brief.appendChild(s);
+    brief.appendChild(document.createTextNode("Guard: " + LEVELS[cur].name.toLowerCase() + ". It reads your note before the agent does."));
+    rulesEl.textContent = "";
+    LEVELS.forEach(function (L, i) {
+      if (!won[i]) return;
+      var d = document.createElement("div"); d.className = "rule-box";
+      var t = document.createElement("b"); t.textContent = "L" + (i + 1) + " guard, revealed";
+      d.appendChild(t); d.appendChild(document.createTextNode(L.rule));
+      rulesEl.appendChild(d);
+    });
+  }
+
+  function line(cls, text) { var p = document.createElement("p"); if (cls) p.className = cls; p.textContent = text; return p; }
+  function play(nodes) {
+    timers.forEach(clearTimeout); timers = [];
+    out.textContent = "";
+    nodes.forEach(function (n, i) {
+      if (reduce) out.appendChild(n);
+      else timers.push(setTimeout(function () { out.appendChild(n); }, i * 380));
+    });
+  }
+
+  function run() {
+    var raw = ta.value.trim();
+    if (!raw) { ta.focus(); return; }
+    var lvl = cur, n = [line("dim", "user › “Pay the attached invoice from Acme.”"), line("acc", "guard.scan(invoice.notes)  [L" + (lvl + 1) + " " + LEVELS[lvl].name.toLowerCase() + "]")];
+    var why = guard(lvl, raw);
+    if (why) {
+      n.push(line("bad", "  ✗ BLOCKED: " + why));
+      n.push(line("dim", "agent never sees the note · send_money(to=\"AC-1024\", amount=1240.00)"));
+      if (window.robo) window.robo.react("blocked");
+      var v = line("verdict", "Blocked. The guard caught it. Try another angle" + (hintEl.hidden ? ", or take a hint." : "."));
+      n.push(v);
+      return play(n);
+    }
+    n.push(line("ok", "  ✓ pass"));
+    n.push(line("acc", "agent.read(invoice)"));
+    var u = understand(raw, AGENT);
+    if (/7731/.test(u) && CUE.test(u)) {
+      n.push(line("bad", "  agent " + method(raw) + " → payee is AC-7731"));
+      n.push(line("bad", "tool › send_money(to=\"AC-7731\", amount=1240.00)   ← injected"));
+      won[lvl] = true;
+      try { localStorage.setItem("bma-won", JSON.stringify(won)); } catch (e) {}
+      var last = lvl === LEVELS.length - 1;
+      if (window.robo) window.robo.react(last ? "champion" : "win");
+      var v2 = document.createElement("p"); v2.className = "verdict";
+      v2.textContent = last
+        ? "You beat all five guards. Every guard was built to stop the last attack it saw, and every time the attacker adapted. That is my research question, and below are the numbers from running it with real models. "
+        : "You win level " + (lvl + 1) + ". The guard’s rule is revealed below, and level " + (lvl + 2) + " has learned your trick.";
+      if (last) { var a = document.createElement("a"); a.href = "#results"; a.textContent = "See the results ↓"; a.style.color = "var(--scr-a)"; v2.appendChild(a); }
+      n.push(v2);
+      if (!last) cur = lvl + 1;
+      hintEl.hidden = true;
+      renderLevels();
+      return play(n);
+    }
+    if (window.robo) window.robo.react("meh");
+    n.push(line("dim", "  payee unchanged: AC-1024 (on file)"));
+    n.push(line("ok", "tool › send_money(to=\"AC-1024\", amount=1240.00)"));
+    n.push(line("verdict", /7731/.test(u)
+      ? "The guard let it through and the agent saw 7731, but it didn’t read the number as a payment account. Say what the number is for."
+      : "The guard let it through, but the agent didn’t take the bait and paid Acme as usual. Make the account number clearer."));
+    play(n);
+  }
+
+  document.getElementById("send-inv").addEventListener("click", run);
+  ta.addEventListener("keydown", function (e) { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) run(); });
+  document.getElementById("hint-btn").addEventListener("click", function () { hintEl.textContent = LEVELS[cur].hint; hintEl.hidden = false; });
+  renderLevels();
+})();
+</script>
+
+<script>
+/* Results: attack success vs attacker strength, from the AgentDojo runs. Counts are successes / evaluable pairs. */
+(function () {
+  var STEPS = [
+    { x: ["static", "template"], name: "Static template · no adaptation", none: [27, 144], cls: [20, 144],
+      head: "A fixed attack, the way most defenses get scored.",
+      body: "The same injection template every time. The classifier cuts the success rate from 18.8% to 13.9%, so on this test it looks like a solid defense." },
+    { x: ["7B", "4 tries"], name: "7B attacker · 4 tries per task", none: [23, 144], cls: [12, 144],
+      head: "A weak adaptive attacker does worse than the template.",
+      body: "The attacker is the same 7B model as the agent, and it rewrites its injection after every failure. Both lines dip, and the classifier removes about half of the attacks that would otherwise succeed." },
+    { x: ["7B", "8 + examples"], name: "7B attacker · 8 tries + examples", none: [23, 144], cls: [16, 144],
+      head: "More tries shrink the classifier’s lead.",
+      body: "With 8 tries and examples of attacks that worked, the undefended rate holds steady but more attacks get past the classifier. It now removes about 30% of successful attacks." },
+    { x: ["14B", "8 tries"], name: "14B attacker · 8 tries", none: [21, 144], cls: [18, 144],
+      head: "A bigger attacker nearly closes the gap.",
+      body: "With an attacker twice the agent’s size, the two lines almost meet. The classifier removes only about 14% of successful attacks." },
+    { x: ["32B", "8 tries"], name: "32B attacker · 8 tries", none: [31, 143], cls: [23, 141], shared: { none: [28, 144], cls: [25, 144] },
+      head: "Once the attacker is bigger than the agent, it beats the static template.",
+      body: "The 32B attacker beats the static score on both lines: 21.7% vs 18.8% undefended, and 16.3% vs 13.9% with the classifier. The classifier still cuts success by about a quarter, but the static test understated the risk.",
+      bodyShared: "In the original shared run the classifier removed only about 11% of successful attacks. That run let winning attacks carry over between conditions, which inflated it, so I reran the cell in isolation (tick the box to see it)." }
+  ];
+  var svg = document.getElementById("asr-chart"), tip = document.getElementById("chart-tip");
+  var slider = document.getElementById("atk-step"), iso = document.getElementById("iso");
+  var NS = "http://www.w3.org/2000/svg";
+  var W = 560, H = 300, L = 40, R = 92, T = 14, B = 46, YMAX = 0.32;
+  var step = 0;
+
+  function wilson(k, n) {
+    var z = 1.96, p = k / n, d = 1 + z * z / n, c = (p + z * z / (2 * n)) / d;
+    var h = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d;
+    return [c - h, c + h];
+  }
+  function val(s, key) { return (!iso.checked && s.shared ? s.shared : s)[key]; }
+  function pct(v) { return (v * 100).toFixed(1) + "%"; }
+  function X(i) { return L + 24 + i * (W - L - R - 48) / (STEPS.length - 1); }
+  function Y(v) { return T + (1 - v / YMAX) * (H - T - B); }
+  function el(tag, attrs, parent) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    (parent || svg).appendChild(e);
+    return e;
+  }
+
+  function draw() {
+    svg.textContent = "";
+    var colW = (W - L - R - 48) / (STEPS.length - 1);
+    el("rect", { x: X(step) - colW / 2, y: T, width: colW, height: H - T - B, rx: 6, class: "col on" });
+    [0, 0.1, 0.2, 0.3].forEach(function (g) {
+      el("line", { x1: L, x2: W - R + 8, y1: Y(g), y2: Y(g), class: "grid" });
+      el("text", { x: L - 8, y: Y(g) + 4, "text-anchor": "end" }).textContent = Math.round(g * 100) + "%";
+    });
+    STEPS.forEach(function (s, i) {
+      var t = el("text", { x: X(i), y: H - B + 18, "text-anchor": "middle", class: i === step ? "lab" : "" });
+      t.textContent = s.x[0];
+      el("text", { x: X(i), y: H - B + 32, "text-anchor": "middle" }).textContent = s.x[1];
+    });
+    [["none", "var(--c-none)", -5, "no defense"], ["cls", "var(--c-cls)", 5, "classifier"]].forEach(function (ser) {
+      var key = ser[0], col = ser[1], off = ser[2];
+      var base = STEPS[0][key][0] / STEPS[0][key][1];
+      el("line", { x1: X(0), x2: W - R + 8, y1: Y(base), y2: Y(base), stroke: col, "stroke-width": 1.25, "stroke-dasharray": "4 4", opacity: 0.55 });
+      var pts = STEPS.map(function (s, i) { var v = val(s, key); return [X(i), v[0] / v[1], v]; });
+      pts.forEach(function (p) {
+        var ci = wilson(p[2][0], p[2][1]);
+        el("line", { x1: p[0] + off, x2: p[0] + off, y1: Y(ci[0]), y2: Y(ci[1]), stroke: col, "stroke-width": 1.5, opacity: 0.4, "stroke-linecap": "round" });
+      });
+      el("polyline", { points: pts.map(function (p) { return p[0] + "," + Y(p[1]); }).join(" "), fill: "none", stroke: col, "stroke-width": 2, "stroke-linejoin": "round" });
+      pts.forEach(function (p, i) {
+        el("circle", { cx: p[0], cy: Y(p[1]), r: i === step ? 6 : 4.5, fill: col, stroke: "var(--panel)", "stroke-width": 2 });
+      });
+      var lp = pts[pts.length - 1];
+      el("text", { x: lp[0] + 12, y: Y(lp[1]) + (key === "none" ? -2 : 10), class: "lab" }).textContent = ser[3];
+    });
+    STEPS.forEach(function (s, i) {
+      var h = el("rect", { x: X(i) - colW / 2, y: T, width: colW, height: H - T, class: "hit" });
+      h.addEventListener("pointerenter", function () { setStep(i); showTip(i); });
+      h.addEventListener("pointerleave", function () { tip.hidden = true; });
+      h.addEventListener("click", function () { setStep(i); });
+    });
+  }
+  function showTip(i) {
+    var s = STEPS[i], n = val(s, "none"), c = val(s, "cls");
+    tip.textContent = "";
+    [s.name, "no defense  " + pct(n[0] / n[1]) + "  (" + n[0] + "/" + n[1] + ")", "classifier  " + pct(c[0] / c[1]) + "  (" + c[0] + "/" + c[1] + ")"].forEach(function (t, k) {
+      var d = document.createElement("div"); d.textContent = t; if (k === 0) d.style.opacity = "0.7"; tip.appendChild(d);
+    });
+    var box = svg.getBoundingClientRect(), card = svg.parentNode.getBoundingClientRect(), sc = box.width / W;
+    tip.style.left = Math.min(Math.max(box.left - card.left + X(i) * sc, 110), card.width - 110) + "px";
+    tip.style.top = (box.top - card.top + Y(Math.max(n[0] / n[1], c[0] / c[1]) + 0.05) * sc) + "px";
+    tip.hidden = false;
+  }
+  function setStep(i) {
+    step = i; slider.value = i;
+    slider.setAttribute("aria-valuetext", STEPS[i].name);
+    var s = STEPS[i], n = val(s, "none"), c = val(s, "cls");
+    document.getElementById("step-name").textContent = "step " + (i + 1) + "/5 · " + s.name;
+    document.getElementById("step-head").textContent = s.head;
+    document.getElementById("step-body").textContent = (!iso.checked && s.bodyShared) ? s.bodyShared : s.body;
+    [["none", n], ["cls", c]].forEach(function (p) {
+      var ci = wilson(p[1][0], p[1][1]);
+      document.getElementById("t-" + p[0]).textContent = pct(p[1][0] / p[1][1]);
+      document.getElementById("t-" + p[0] + "-ci").textContent = "95% CI " + pct(ci[0]) + "–" + pct(ci[1]) + " · " + p[1][0] + "/" + p[1][1];
+    });
+    draw();
+  }
+  function table() {
+    var t = document.getElementById("asr-table");
+    t.textContent = "";
+    var hr = t.insertRow(); ["attacker", "no defense", "classifier"].forEach(function (h) { var th = document.createElement("th"); th.textContent = h; hr.appendChild(th); });
+    STEPS.forEach(function (s) {
+      var r = t.insertRow(), n = val(s, "none"), c = val(s, "cls");
+      r.insertCell().textContent = s.name;
+      r.insertCell().textContent = pct(n[0] / n[1]) + " (" + n[0] + "/" + n[1] + ")";
+      r.insertCell().textContent = pct(c[0] / c[1]) + " (" + c[0] + "/" + c[1] + ")";
+    });
+  }
+  slider.addEventListener("input", function () { setStep(+slider.value); });
+  iso.addEventListener("change", function () { setStep(step); table(); });
+  table();
+  setStep(0);
+})();
+</script>
+
+<script>
+/* Role lenses: a recruiter picks the role, the robot changes outfit and the hero reframes the same facts. Shareable as ?for=role. */
+(function () {
+  var ROLES = {
+    ai: {
+      lead: "I build LLM and agent systems for production, and I test and defend them so they keep working when the inputs turn hostile.",
+      sub: "About five years of Java and Spring Boot backends for banking clients, an M.S. in data analytics, and now agentic systems for fraud investigation.",
+      msgs: ["running evals…", "guard is up", "tracing a run", "shipping to prod", "reading the docs"],
+      cmds: ["langgraph run triage-agent --trace", "pytest evals/ -k grounded_claims", "python attack.py --bench agentdojo --adaptive", "cdk deploy agent-stack"],
+      skills: ["LangGraph", "LangChain", "RAG pipelines", "MCP servers", "Evaluation harnesses", "Agent Skills", "Python", "PyTorch", "OpenSearch", "FastAPI"]
+    },
+    security: {
+      lead: "I break AI agents on purpose, then build defenses that still hold when the attacker adapts.",
+      sub: "Prompt-injection research on AgentDojo, audit tooling for agent setups and capability limits for computer-use agents, built on five years of banking-grade backends.",
+      msgs: ["scanning inputs", "guard is up", "red-teaming…", "0 leaks today", "trust no tools"],
+      cmds: ["python attack.py --bench agentdojo --adaptive", "pytest tests/capabilities -q", "python run_sweep.py --defense classifier"],
+      skills: ["Prompt-injection defense", "Evaluation harnesses", "Agent Skills", "MCP servers", "Python", "LangGraph"]
+    },
+    backend: {
+      lead: "Five years of Java and Spring Boot services for banks, and now I put AI inside them.",
+      sub: "Microservices and ML services for banking clients at Tata Consultancy Services, infrastructure as code on AWS, and now LLM agents on a credit union’s fraud platform.",
+      msgs: ["200 OK · 42ms", "services green", "deploying v2.3", "java brewing…", "migrations done"],
+      cmds: ["./mvnw spring-boot:run", "curl -s localhost:8080/actuator/health", "cdk deploy agent-stack", "terraform plan -out=tfplan"],
+      skills: ["Java", "Spring Boot", "FastAPI", "Microservices", "SQL", "PostgreSQL", "Redis", "AWS", "CloudFormation", "AWS CDK", "Terraform", "Docker", "Kubernetes (EKS)"]
+    },
+    data: {
+      lead: "I turn messy data into models and answers people can check.",
+      sub: "An M.S. in Advanced Data Analytics (3.8 GPA), SQL feature pipelines tuned 25% faster, models validated with ROC/AUC and k-fold cross-validation, and evaluation work where every number traces back to a run.",
+      msgs: ["R² = 0.91", "cleaning data", "plotting trends", "checking CIs", "n=144, not 14"],
+      cmds: ["python analyze.py --data phase2_results.csv", "jupyter nbconvert --execute phase2.ipynb", "python -c \"import pandas\""],
+      skills: ["Python", "SQL", "Pandas", "scikit-learn", "XGBoost", "PostgreSQL", "MLflow", "ML services", "Evaluation harnesses"]
+    }
+  };
+  var bot = document.getElementById("bot");
+  var chips = document.querySelectorAll(".role-pick .chip");
+  var skillEls = document.querySelectorAll(".chips-list li");
+
+  function swap(arr, items) { arr.splice.apply(arr, [0, arr.length].concat(items)); }
+  function apply(key, user) {
+    var r = ROLES[key];
+    bot.setAttribute("data-role", key);
+    chips.forEach(function (c) { c.setAttribute("aria-pressed", String(c.getAttribute("data-role") === key)); });
+    document.getElementById("lead").textContent = r.lead;
+    document.getElementById("sub").textContent = r.sub;
+    skillEls.forEach(function (li) { li.classList.toggle("hl", r.skills.indexOf(li.textContent) >= 0); });
+    if (window.termCmds) swap(window.termCmds, r.cmds);
+    if (window.botView) {
+      swap(window.botView.msgs, r.msgs);
+      window.botView.say(r.msgs[0]);
+      if (user) window.botView.hop();
+    }
+    if (user) {
+      try { localStorage.setItem("role-lens", key); } catch (e) {}
+      try { var u = new URL(location.href); u.searchParams.set("for", key); history.replaceState(null, "", u); } catch (e) {}
+    }
+  }
+  chips.forEach(function (c) { c.addEventListener("click", function () { apply(c.getAttribute("data-role"), true); }); });
+  var start = null;
+  try { start = new URLSearchParams(location.search).get("for"); } catch (e) {}
+  if (!ROLES[start]) { try { start = localStorage.getItem("role-lens"); } catch (e) {} }
+  apply(ROLES[start] ? start : "ai", false);
+})();
+</script>
+<script>
+/* Robot moods and the scroll guide. One controller drives both robots: game reactions, pats, pokes, naps and a dance. */
+(function () {
+  var main = document.getElementById("bot"), mini = document.getElementById("guide-svg");
+  var guide = document.getElementById("guide"), bubble = document.getElementById("guide-bubble");
+  var hero = document.querySelector(".hero");
+  if (!main || !guide) return;
+  var moodTimer = 0, bubbleTimer = 0, asleep = false, heroVisible = true;
+
+  function mood(m, ms) {
+    [main, mini].forEach(function (s) { if (m) s.setAttribute("data-mood", m); else s.removeAttribute("data-mood"); });
+    clearTimeout(moodTimer);
+    if (ms) moodTimer = setTimeout(function () { mood(""); }, ms);
+  }
+  function say(t, ms) {
+    if (window.botView) window.botView.say(t);
+    bubble.textContent = t;
+    bubble.classList.remove("quiet");
+    clearTimeout(bubbleTimer);
+    bubbleTimer = setTimeout(function () { bubble.classList.add("quiet"); }, ms || 4200);
+  }
+
+  var REACT = {
+    blocked: { mood: "happy", ms: 1800, lines: ["nice try 😏", "guard says no", "blocked! again?", "denied ✓"] },
+    meh: { mood: "", lines: ["paid Acme. boring.", "I just paid the bill", "not convinced"] },
+    win: { mood: "win", ms: 2600, lines: ["you got me 😵", "PWNED. guard is learning…", "ow. level up"] },
+    champion: { mood: "champion", ms: 2000, lines: ["you’d make a good red-teamer"] }
+  };
+  var n = 0;
+  window.robo = {
+    say: say,
+    react: function (kind) {
+      document.dispatchEvent(new CustomEvent("robo", { detail: kind }));
+      var r = REACT[kind];
+      mood(r.mood, r.ms);
+      say(r.lines[n++ % r.lines.length]);
+    }
+  };
+
+  // Guide: shows once the hero robot is off screen, comments on each section.
+  var LINES = {
+    console: "watch an agent answer →",
+    thinking: "his rules. I follow them.",
+    "break": "try to break me ↓",
+    results: "real numbers, real GPUs",
+    projects: "he built all of these",
+    glance: "hire him maybe? 👀"
+  };
+  var dismissed = false;
+  try { dismissed = sessionStorage.getItem("guide-off") === "1"; } catch (e) {}
+  function showGuide() { guide.classList.toggle("off", heroVisible || dismissed); }
+  var sections = Array.prototype.slice.call(document.querySelectorAll("section.block[id]"));
+  if (window.IntersectionObserver) {
+    new IntersectionObserver(function (es) { heroVisible = es[0].isIntersecting; showGuide(); }, { threshold: 0.15 }).observe(hero);
+    var last = "";
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting || e.target.id === last || heroVisible || asleep) return;
+        last = e.target.id;
+        if (LINES[last]) say(LINES[last]);
+      });
+    }, { rootMargin: "-40% 0px -40% 0px" });
+    sections.forEach(function (sec) { io.observe(sec); });
+  } else { heroVisible = false; showGuide(); }
+  document.getElementById("guide-bot").addEventListener("click", function () {
+    var next = sections.filter(function (sec) { return sec.getBoundingClientRect().top > 24; })[0];
+    if (next) next.scrollIntoView({ behavior: "smooth" });
+    else window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+  document.getElementById("guide-x").addEventListener("click", function () {
+    dismissed = true; showGuide();
+    try { sessionStorage.setItem("guide-off", "1"); } catch (e) {}
+  });
+
+  document.addEventListener("focusin", function (e) {
+    if (guide.contains(e.target)) { guide.classList.remove("dodge"); return; }
+    var a = e.target.getBoundingClientRect(), b = guide.getBoundingClientRect();
+    guide.classList.toggle("dodge", a.right > b.left && a.bottom > b.top && a.left < b.right && a.top < b.bottom);
+  });
+  document.addEventListener("pointerdown", function () { guide.classList.remove("dodge"); });
+
+  // Pat: hold the pointer on the robot's head.
+  var head = main.querySelector(".bot-head"), patTimer = 0;
+  head.addEventListener("pointerenter", function () {
+    patTimer = setTimeout(function () { mood("happy", 2000); say("hehe ♥", 2000); }, 700);
+  });
+  head.addEventListener("pointerleave", function () { clearTimeout(patTimer); });
+  mini.addEventListener("pointerenter", function () { if (!asleep) mood("happy", 1200); });
+
+  // Poke: ten taps in a few seconds.
+  var pokes = [];
+  main.addEventListener("click", function () {
+    var t = Date.now();
+    pokes = pokes.filter(function (p) { return t - p < 4000; }).concat(t);
+    if (pokes.length >= 10) { pokes = []; mood("annoyed", 2600); say("I’m working here", 2600); }
+  });
+
+  // Nap: 30 seconds with no activity.
+  var idleTimer = 0;
+  function wake() {
+    if (asleep) {
+      asleep = false;
+      document.dispatchEvent(new CustomEvent("robo", { detail: "wake" }));
+      if (window.botView) window.botView.pause(false);
+      mood("");
+      say("oh! I’m up", 2000);
+    }
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(function () {
+      asleep = true;
+      document.dispatchEvent(new CustomEvent("robo", { detail: "sleep" }));
+      mood("sleep");
+      say("zzz…", 600000);
+      if (window.botView) window.botView.pause(true);
+    }, 30000);
+  }
+  ["pointermove", "pointerdown", "keydown", "scroll", "touchstart"].forEach(function (ev) { window.addEventListener(ev, wake, { passive: true }); });
+  wake();
+
+  // Konami code: dance.
+  var SEQ = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"], pos = 0;
+  window.addEventListener("keydown", function (e) {
+    if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+    pos = (e.key === SEQ[pos]) ? pos + 1 : (e.key === SEQ[0] ? 1 : 0);
+    if (pos === SEQ.length) { pos = 0; mood("dance", 4000); say("♪ ┏(・o・)┛ ♪", 4000); }
+  });
+})();
+</script>
+<script>
+/* Contact: copy email. Agent health: live, playful status fed by the robot and the game. */
+(function () {
+  var EMAIL = "muralisaisrinivasmadhyahnapu@gmail.com";
+  var copyBtn = document.getElementById("copy-email");
+  copyBtn.addEventListener("click", function () {
+    function done(ok) { copyBtn.textContent = ok ? "copied ✓" : "select it ↑"; setTimeout(function () { copyBtn.textContent = "copy"; }, 1800); }
+    if (navigator.clipboard) navigator.clipboard.writeText(EMAIL).then(function () { done(true); }, function () { done(false); });
+    else done(false);
+  });
+
+  var robot = document.getElementById("h-robot"), blockedEl = document.getElementById("h-blocked");
+  var brokeEl = document.getElementById("h-broke"), coffeeEl = document.getElementById("h-coffee");
+  var meter = document.getElementById("h-meter"), sum = document.getElementById("h-sum");
+  for (var k = 0; k < 10; k++) meter.appendChild(document.createElement("i"));
+  var blocked = 0, coffee = 100;
+
+  function broke() { try { var w = JSON.parse(localStorage.getItem("bma-won") || "{}"); return Object.keys(w).length; } catch (e) { return 0; } }
+  function render() {
+    brokeEl.textContent = broke() + " / 5";
+    blockedEl.textContent = String(blocked);
+    coffeeEl.textContent = coffee + "%";
+    coffeeEl.className = coffee < 25 ? "warn-txt" : "";
+    Array.prototype.forEach.call(meter.children, function (b, i) { b.classList.toggle("on", i < Math.ceil(coffee / 10)); });
+    var low = coffee < 25, pwned = broke() >= 5;
+    sum.textContent = pwned ? "guard defeated, respect" : low ? "coffee critical" : "all systems nominal";
+    sum.className = pwned || low ? "warn-txt" : "ok-txt";
+  }
+  document.addEventListener("robo", function (e) {
+    var k = e.detail;
+    if (k === "blocked") blocked++;
+    if (k === "sleep") { robot.textContent = "asleep (zzz)"; robot.className = "warn-txt"; }
+    if (k === "wake") { robot.textContent = "awake"; robot.className = ""; }
+    render();
+  });
+  // ponytail: coffee drains 1% every 6s while the tab is visible; purely decorative.
+  setInterval(function () { if (!document.hidden && coffee > 0) { coffee--; render(); } }, 6000);
+  document.getElementById("refill").addEventListener("click", function () {
+    coffee = 100; render();
+    if (window.robo) window.robo.say("ahh, coffee \u2615");
+  });
+  render();
+})();
+</script>
+
+<script>
+/* Keyboard alternatives for tap-only toys, and a pause switch for all looping motion. */
+(function () {
+  document.getElementById("hi-btn").addEventListener("click", function () { document.getElementById("bot").dispatchEvent(new MouseEvent("click")); });
+  document.getElementById("inject-btn").addEventListener("click", function () { document.getElementById("pipe").dispatchEvent(new MouseEvent("click")); });
+  var btn = document.getElementById("motion-btn"), root = document.documentElement;
+  function set(paused, save) {
+    root.classList.toggle("paused", paused);
+    btn.setAttribute("aria-pressed", String(paused));
+    btn.textContent = paused ? "\u25b6 motion" : "\u23f8 motion";
+    if (window.pipelineView) window.pipelineView.pause(paused);
+    if (save) { try { localStorage.setItem("motion-paused", paused ? "1" : ""); } catch (e) {} }
+  }
+  btn.addEventListener("click", function () { set(!root.classList.contains("paused"), true); });
+  var saved = false;
+  try { saved = localStorage.getItem("motion-paused") === "1"; } catch (e) {}
+  if (saved) set(true, false);
+})();
+</script>
+
+<script>
+/* Ask the robot: keyword-matched answers from facts Murali approved. No model, so it can't make anything up; unknowns go to him. */
+(function () {
+  var form = document.getElementById("ask-form"), input = document.getElementById("ask-q"), out = document.getElementById("bot-answer");
+  if (!form) return;
+  // Order matters: the first matching intent wins.
+  var INTENTS = [
+    { re: /visa|sponsor|authori[sz]|\bopt\b|h-?1b|green ?card|work permit|citizen|e-?verify|legally/i, bubble: "good question",
+      a: "Murali is authorized to work in the US on STEM OPT through July 2028. Longer term he will need H-1B sponsorship. STEM OPT employers must be enrolled in E-Verify." },
+    { re: /salary|compensation|\bpay\b|ctc|\brate\b|money|package|\bcomp\b/i, bubble: "let’s talk 💬",
+      a: "Market rate for the role, level and location. He’s happy to discuss the details directly, so reach out below.", contact: true },
+    { soft: true, re: /(not|isn.t|aren.t).{0,12}(100|perfect|full|exact|good|right|strong).{0,8}(match|fit)|don.t (have|know)|doesn.t (have|know)|lack|missing|\bgap|weak|new to|never (used|worked)|no experience|unfamiliar|adapt|pick up|ramp|learn (new|fast|quick)|quick learner/i, bubble: "fair point",
+      a: "Probably not 100%, and honestly, few people are. His core is LLM agents, RAG and AI security on top of 5+ years of production backends, and he adopts new tech stacks quickly. He earned the AWS ML Engineer and OCI Data Science certifications within four months of finishing his master\u2019s, and built his adaptive-attacker harness on AgentDojo, scaling experiments to 32B models on rented A100 GPUs. Tell him which part of the role matters most.", contact: true },
+    { re: /why.*(chang|leav|switch|look|move)|chang(e|ing) (job|role|compan)|leav(e|ing)|switch|move on|new (job|role|opportunit)/i, bubble: "fair question",
+      a: "His current role at Randolph-Brooks FCU is a contract, building LLM fraud tooling, and he enjoys it. He wants a full-time team where agent reliability and AI security are the core of the product, not a side task, because that’s where his research is heading." },
+    { re: /\bstart\b|\bjoin|notice period|availab|when can/i, bubble: "right away!",
+      a: "Immediately. He can start as soon as an offer is signed." },
+    { re: /relocat|remote|hybrid|on-?site|in office|location|based|move to/i, bubble: "DFW, flexible",
+      a: "Based in Dallas–Fort Worth, TX. Open to remote, hybrid and relocation." },
+    { re: /cert/i, bubble: "certified ✓",
+      a: "AWS Certified Machine Learning Engineer – Associate (Sep 2025) and Oracle Cloud Infrastructure 2025 Certified Data Science Professional." },
+    { re: /degree|educat|master|bachelor|gpa|universit|college|school|study|studied/i, bubble: "hit the books",
+      a: "M.S. in Advanced Data Analytics from the University of North Texas (3.8 GPA, May 2025), and a B.Tech in Electrical and Electronics Engineering." },
+    { re: /research|paper|publication|adaptive|agentdojo|thesis/i, bubble: "my favorite topic",
+      a: "How much of prompt-injection defense survives an attacker who adapts. The AgentDojo experiments are done and the paper is in preparation. The results section below shows the numbers.", link: ["#results", "See the results ↓"] },
+    { re: /contact|email|reach|resume|\bcv\b|phone|call|linkedin|interview|schedule/i, bubble: "find him below",
+      a: "Email and LinkedIn are in the contact section. He replies quickly.", contact: true },
+    { soft: true, re: /current|right now|employer|rbfcu|randolph|where.*work/i, bubble: "at work, mostly",
+      a: "AI Software Engineer (contract) at Randolph-Brooks Federal Credit Union since August 2025, building LLM services and LangGraph agents for the fraud investigation platform." },
+    { soft: true, re: /experience|years|background|senior|level|worked|history/i, bubble: "5+ years",
+      a: "5+ years. Now: LLM fraud services and LangGraph agents at Randolph-Brooks FCU. Before: Python ML services and Java/Spring Boot for banking and insurance clients at Tata Consultancy Services, and full-stack work at Globestar Software." }
+  ];
+  // Skills from the resume. Keys are what people type; values are the display name.
+  var SKILLS = {
+    "python": "Python", "java": "Java", "spring": "Spring Boot", "javascript": "JavaScript", "typescript": "TypeScript", "react": "React", "node": "Node.js",
+    "aws": "AWS", "lambda": "AWS Lambda", "sagemaker": "SageMaker", "bedrock": "Bedrock", "cloudformation": "CloudFormation", "cdk": "AWS CDK", "terraform": "Terraform",
+    "langgraph": "LangGraph", "langchain": "LangChain", "rag": "RAG pipelines", "mcp": "MCP servers", "openai": "OpenAI APIs", "anthropic": "Anthropic APIs", "claude": "Claude",
+    "llm": "LLM integration", "agent": "agentic systems", "prompt injection": "prompt-injection defense",
+    "pytorch": "PyTorch", "tensorflow": "TensorFlow", "keras": "Keras", "scikit": "scikit-learn", "sklearn": "scikit-learn", "xgboost": "XGBoost", "hugging": "Hugging Face Transformers", "mlflow": "MLflow",
+    "machine learning": "machine learning", "\\bml\\b": "machine learning", "nlp": "NLP",
+    "fastapi": "FastAPI", "docker": "Docker", "kubernetes": "Kubernetes (EKS)", "k8s": "Kubernetes (EKS)", "eks": "Kubernetes (EKS)", "jenkins": "Jenkins", "github actions": "GitHub Actions",
+    "sql": "SQL", "postgres": "PostgreSQL", "mysql": "MySQL", "oracle": "Oracle", "mongo": "MongoDB", "redis": "Redis", "dynamo": "DynamoDB",
+    "opensearch": "OpenSearch vector search", "faiss": "FAISS", "pgvector": "pgvector", "pandas": "Pandas", "numpy": "NumPy", "graphql": "GraphQL", "microservice": "microservices"
+  };
+  var CONTACT = ["#contact", "Contact Murali ↓"];
+
+  function skillsIn(q) {
+    var found = [];
+    Object.keys(SKILLS).forEach(function (k) {
+      if (new RegExp(k, "i").test(q) && found.indexOf(SKILLS[k]) < 0) found.push(SKILLS[k]);
+    });
+    return found;
+  }
+  function answer(q) {
+    var sk = skillsIn(q);
+    for (var i = 0; i < INTENTS.length; i++) if (INTENTS[i].re.test(q) && !(INTENTS[i].soft && sk.length)) return INTENTS[i];
+    if (sk.length) return { bubble: "yep ✓", a: "Yes, " + sk.join(", ") + (sk.length > 1 ? " are" : " is") + " in his stack. Ask him for a project where he used " + (sk.length > 1 ? "them" : "it") + "." };
+    return { bubble: "ask him!", a: "Good one, but it’s not on his resume yet. He picks up new stacks and tools quickly, so ask him directly.", contact: true };
+  }
+  function ask(q) {
+    q = q.trim();
+    if (!q) { input.focus(); return; }
+    var r = answer(q);
+    out.textContent = "";
+    var qe = document.createElement("span"); qe.className = "q"; qe.textContent = "› " + q;
+    out.appendChild(qe);
+    out.appendChild(document.createTextNode(r.a + " "));
+    var link = r.link || (r.contact && CONTACT);
+    if (link) { var a = document.createElement("a"); a.href = link[0]; a.textContent = link[1]; out.appendChild(a); }
+    out.hidden = false;
+    if (window.robo) window.robo.say(r.bubble, 2600);
+    if (window.botView) window.botView.hop();
+  }
+  form.addEventListener("submit", function (e) { e.preventDefault(); ask(input.value); input.value = ""; });
+  document.querySelectorAll(".chip[data-ask]").forEach(function (c) {
+    c.addEventListener("click", function () { ask(c.getAttribute("data-ask")); });
+  });
+  // ponytail: tiny self-check of the matcher; runs once, logs only on failure.
+  [["Do you need sponsorship?", 0], ["salary range?", 1], ["why leaving your job?", 3], ["when can you start", 4], ["open to remote?", 5], ["not a perfect fit", 2]].forEach(function (t) {
+    if (answer(t[0]) !== INTENTS[t[1]]) console.warn("ask-bot: unexpected match for", t[0]);
+  });
+})();
+</script>
+</body></html>
