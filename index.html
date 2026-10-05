@@ -1160,6 +1160,15 @@ details.table-view th, details.table-view td { text-align: left; padding: 0.25re
       </article>
 
       <article class="proj">
+        <span class="tag">research · ai security · mcp</span>
+        <p class="q">When an agent reads tool results, what does a defense actually cost?</p>
+        <h3>mcp-injection-eval</h3>
+        <p>A reproducible harness for indirect prompt injection at an MCP-style tool boundary: 20 attacks hidden in tool results, each with a programmatic success check, run against four defense modes and scored on attack success and utility under attack. Main finding: the cost comes from judge granularity, not detection. Filtering per item instead of per result kept attack success at 0% and raised utility from 5% to 100%. The undefended model also refused all 20 attacks, and the write-up reports that as a floor effect, not a win.</p>
+        <span class="status">utility under attack <b>5% → 100%</b> at 0% attack success</span>
+        <a class="link" href="https://github.com/Itachi3355/mcp-injection-eval">github.com/Itachi3355/mcp-injection-eval ↗</a>
+      </article>
+
+      <article class="proj">
         <span class="tag">agent skill · ai reliability</span>
         <p class="q">Which parts of an AI answer can you actually trust?</p>
         <h3>verify-ai-output</h3>
@@ -1230,7 +1239,7 @@ details.table-view th, details.table-view td { text-align: left; padding: 0.25re
           <li>Python</li><li translate="no">PyTorch</li><li translate="no">TensorFlow</li><li translate="no">scikit-learn</li><li translate="no">XGBoost</li><li translate="no">Hugging Face</li><li translate="no">MLflow</li><li>ML services</li>
           <li>SQL</li><li translate="no">Pandas</li><li translate="no">PostgreSQL</li><li translate="no">Redis</li>
           <li>Java</li><li>Spring Boot</li><li translate="no">FastAPI</li><li>Microservices</li><li translate="no">React</li><li translate="no">TypeScript</li>
-          <li>AWS</li><li translate="no">SageMaker</li><li>CloudFormation</li><li>AWS CDK</li><li>Terraform</li><li translate="no">Docker</li><li>Kubernetes (EKS)</li><li translate="no">Supabase</li>
+          <li>AWS</li><li>Lambda</li><li>API Gateway</li><li translate="no">DynamoDB</li><li>S3</li><li translate="no">CloudWatch</li><li translate="no">SageMaker</li><li>CloudFormation</li><li>AWS CDK</li><li>Terraform</li><li translate="no">Docker</li><li>Kubernetes (EKS)</li><li translate="no">Supabase</li>
         </ul>
       </div>
       <div id="open">
@@ -2328,7 +2337,7 @@ details.table-view th, details.table-view td { text-align: left; padding: 0.25re
       sub: "Microservices and ML services for banking clients at Tata Consultancy Services, infrastructure as code on AWS, and now LLM agents on a credit union’s fraud platform.",
       msgs: ["200 OK · 42ms", "services green", "deploying v2.3", "java brewing…", "migrations done"],
       cmds: ["./mvnw spring-boot:run", "curl -s localhost:8080/actuator/health", "cdk deploy agent-stack", "terraform plan -out=tfplan"],
-      skills: ["Java", "Spring Boot", "FastAPI", "Microservices", "SQL", "PostgreSQL", "Redis", "AWS", "CloudFormation", "AWS CDK", "Terraform", "Docker", "Kubernetes (EKS)"]
+      skills: ["Java", "Spring Boot", "FastAPI", "Microservices", "SQL", "PostgreSQL", "Redis", "AWS", "Lambda", "API Gateway", "DynamoDB", "CloudFormation", "AWS CDK", "Terraform", "Docker", "Kubernetes (EKS)"]
     },
     data: {
       lead: "I turn messy data into models and answers people can check.",
@@ -2596,7 +2605,7 @@ details.table-view th, details.table-view td { text-align: left; padding: 0.25re
   // Skills from the resume. Keys are what people type; values are the display name.
   var SKILLS = {
     "python": "Python", "java": "Java", "spring": "Spring Boot", "javascript": "JavaScript", "typescript": "TypeScript", "react": "React", "node": "Node.js",
-    "aws": "AWS", "lambda": "AWS Lambda", "sagemaker": "SageMaker", "bedrock": "Bedrock", "cloudformation": "CloudFormation", "cdk": "AWS CDK", "terraform": "Terraform",
+    "aws": "AWS", "lambda": "AWS Lambda", "api gateway": "API Gateway", "\\bs3\\b": "S3", "cloudwatch": "CloudWatch", "\\biam\\b": "IAM","sagemaker": "SageMaker", "bedrock": "Bedrock", "cloudformation": "CloudFormation", "cdk": "AWS CDK", "terraform": "Terraform",
     "langgraph": "LangGraph", "langchain": "LangChain", "rag": "RAG pipelines", "mcp": "MCP servers", "openai": "OpenAI APIs", "anthropic": "Anthropic APIs", "claude": "Claude",
     "llm": "LLM integration", "agent": "agentic systems", "prompt injection": "prompt-injection defense",
     "pytorch": "PyTorch", "tensorflow": "TensorFlow", "keras": "Keras", "scikit": "scikit-learn", "sklearn": "scikit-learn", "xgboost": "XGBoost", "hugging": "Hugging Face Transformers", "mlflow": "MLflow",
